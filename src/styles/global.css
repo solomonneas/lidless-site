@@ -53,6 +53,8 @@ body {
   text-transform: uppercase;
   color: var(--text-muted);
 }
+/* section titles (WHAT IT DOES, CLIENT CONFIG, INSTALL, etc.) read as bold headings */
+.section-rule .kicker { font-weight: 700; color: var(--white); }
 a { color: inherit; }
 
 /* Section heading rule: accent dash + label + thin rule */

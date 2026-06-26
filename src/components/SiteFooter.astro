@@ -1,0 +1,15 @@
+---
+import { SITE, EXTERNAL } from '../lib/site.ts';
+---
+<footer class="px-6 md:px-10 py-10 border-t mt-20 text-sm" style="border-color: var(--hairline); color: var(--text-muted);">
+  <div class="flex flex-wrap gap-6 items-center">
+    <span class="font-mono font-medium" style="color: var(--text);">LIDLESS<span style="color: var(--accent);">_</span></span>
+    <a href="#security">Security / SOC</a>
+    <a href="#network">Network</a>
+    <a href="#homelab">Homelab</a>
+    <a href={EXTERNAL.github}>GitHub</a>
+    <span class="flex-1"></span>
+    <span class="font-mono" style="color: var(--accent);">{SITE.motto}</span>
+    <span class="font-mono">{SITE.version}</span>
+  </div>
+</footer>

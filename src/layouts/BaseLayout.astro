@@ -1,0 +1,108 @@
+---
+import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Seo from '../components/Seo.astro';
+import { SITE } from '../lib/site.ts';
+import { composeTitle, organizationLd, websiteLd, graph } from '../lib/seo.ts';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Page-specific JSON-LD. Defaults to the site-level Organization + WebSite graph. */
+  jsonLd?: object | object[];
+  keywords?: string[];
+}
+
+const {
+  title: pageTitle,
+  description = SITE.metaDescription ?? SITE.description,
+  jsonLd,
+  keywords = [
+    'Lidless',
+    'security tooling',
+    'SOC tooling',
+    'netops',
+    'homelab',
+    'MCP server',
+    'Wazuh MCP',
+    'MISP MCP',
+    'Suricata MCP',
+    'TheHive MCP',
+    'MITRE ATT&CK',
+    'LibreNMS',
+    'Proxmox MCP',
+    'AdGuard Home',
+    'AI agent',
+    'Claude Code',
+    'open source security',
+  ],
+} = Astro.props as Props;
+
+const title = composeTitle(pageTitle, SITE.seoTitle);
+// Default page graph: who we are (Organization) + this site (WebSite).
+const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <Seo siteName={SITE.name} title={title} description={description} keywords={keywords} jsonLd={ld} />
+    <link rel="icon" href="/favicon.svg" />
+    <!-- Fonts: Instrument Sans (body) + IBM Plex Mono (labels / wordmark / code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <Analytics />
+  </head>
+  <body>
+    <SiteNav />
+    <slot />
+    <SiteFooter />
+    <script is:inline>
+      // Copy button on every code / terminal / config block (.term).
+      (() => {
+        const copyText = (term) => {
+          const lineEls = term.querySelectorAll(':scope > div');
+          let lines = lineEls.length
+            ? [...lineEls].map((d) => d.textContent.replace(/ /g, ' ').replace(/\s+$/, ''))
+            : term.textContent.split('\n');
+          const hasPrompt = lines.some((l) => /^\s*\$/.test(l));
+          if (hasPrompt) {
+            return lines.filter((l) => /^\s*\$/.test(l)).map((l) => l.replace(/^\s*\$\s?/, '')).join('\n');
+          }
+          return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+        };
+        document.querySelectorAll('.term').forEach((term) => {
+          if (term.parentElement && term.parentElement.classList.contains('term-wrap')) return;
+          const wrap = document.createElement('div');
+          wrap.className = 'term-wrap';
+          term.parentNode.insertBefore(wrap, term);
+          wrap.appendChild(term);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'copy-btn';
+          btn.textContent = 'Copy';
+          btn.setAttribute('aria-label', 'Copy to clipboard');
+          wrap.appendChild(btn);
+          btn.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(copyText(term));
+              btn.textContent = 'Copied';
+              btn.classList.add('copied');
+              setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+            } catch {
+              btn.textContent = 'Press ⌘C';
+              setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+            }
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

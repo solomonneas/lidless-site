@@ -1,0 +1,231 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'suricata-mcp')!;
+const { name, oneLiner, lifecycle, category, repo, npm } = tool;
+
+const pageUrl = 'https://lidless.dev/suricata-mcp';
+const title = 'Suricata MCP server - analyze NIDS alerts with AI';
+const description =
+  'suricata-mcp is an open-source MCP server for NSM. Query Suricata EVE alerts and Zeek logs, run C2/DGA/exfil analytics, and correlate from any MCP client.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name,
+    siteUrl: pageUrl,
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: repo,
+    license: 'MIT',
+  }),
+]);
+
+const badgeClass =
+  lifecycle === 'Active'
+    ? 'badge badge-active'
+    : lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+// Capabilities, grouped as the README documents them (36 tools).
+const toolGroups: { group: string; tools: { name: string; desc: string }[] }[] = [
+  {
+    group: 'Suricata alerts & flows',
+    tools: [
+      { name: 'suricata_query_alerts / suricata_alert_summary', desc: 'Search EVE alerts by SID, signature, category, severity, IP, port, protocol, and time; aggregate counts.' },
+      { name: 'suricata_top_alerts / suricata_alert_timeline', desc: 'Top alerts by frequency/severity and time-bucketed alert counts.' },
+      { name: 'suricata_query_flows / suricata_flow_summary', desc: 'Search flows and surface top talkers, protocol distribution, and bandwidth stats.' },
+    ],
+  },
+  {
+    group: 'Suricata protocol analysis',
+    tools: [
+      { name: 'suricata_query_dns / suricata_query_http / suricata_query_tls', desc: 'Inspect DNS, HTTP, and TLS (SNI, JA3/JA4, cert subject/issuer) transactions.' },
+      { name: 'suricata_query_ssh / suricata_query_fileinfo / suricata_query_anomalies', desc: 'SSH versions, extracted files (name/magic/hash), and protocol anomalies.' },
+    ],
+  },
+  {
+    group: 'Advanced analytics',
+    tools: [
+      { name: 'suricata_beaconing_detection', desc: 'Detect C2 beaconing via connection-interval analysis with jitter and confidence scoring.' },
+      { name: 'suricata_dga_detection', desc: 'Detect DGA domains using Shannon-entropy analysis on DNS queries.' },
+      { name: 'suricata_exfiltration_detection / suricata_lateral_movement_detection', desc: 'Flag abnormal outbound transfer and internal-to-internal scanning on unusual ports.' },
+    ],
+  },
+  {
+    group: 'Investigation & Zeek',
+    tools: [
+      { name: 'suricata_investigate_host / suricata_investigate_alert', desc: 'Full host investigation across event types; deep alert investigation with correlated data.' },
+      { name: 'zeek_query_connections / dns / http / ssl / files / ssh / weird', desc: 'Query Zeek NSM TSV logs across conn, dns, http, ssl, files, ssh, and weird.' },
+      { name: 'correlate_alert_with_zeek', desc: 'Cross-correlate Suricata alerts with Zeek logs by IP pair and time window.' },
+    ],
+  },
+  {
+    group: 'Rules, engine, PCAP & threat intel',
+    tools: [
+      { name: 'suricata_search_rules / suricata_rule_stats / suricata_create_rule / suricata_toggle_rule', desc: 'Search and stat the ruleset; create or enable/disable rules (mutation-gated).' },
+      { name: 'suricata_engine_stats / suricata_reload_rules / suricata_iface_stat', desc: 'Engine, decoder, and interface stats plus live rule reload via Unix socket.' },
+      { name: 'pcap_list / pcap_replay_suricata / pcap_replay_zeek', desc: 'List PCAPs and replay them through Suricata or Zeek (mutation-gated).' },
+      { name: 'misp_search_ioc / thehive_create_case / thehive_create_alert', desc: 'Look up IOCs in MISP and push cases/alerts to TheHive for triage.' },
+    ],
+  },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="tool-page px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- breadcrumb / back to hub -->
+    <nav class="kicker mb-7" aria-label="Breadcrumb">
+      <a href="/" style="color: var(--text-dim); text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / {category} / {name}</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark text-4xl md:text-5xl m-0">{name}</h1>
+        <span class={badgeClass}>{lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={tool.repo} rel="noopener">GitHub repo &rarr;</a>
+        {tool.npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${tool.npm}`} rel="noopener">npm: {tool.npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+      <div class="flex flex-wrap gap-3 mt-6 items-center">
+        {npm && (
+          <span class="npm-tag">npm i -g {npm}</span>
+        )}
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <div class="max-w-2xl" style="color: var(--text-muted);">
+        <p class="mb-4">
+          <code>suricata-mcp</code> is a Model Context Protocol server for network security
+          monitoring. It gives an LLM intelligent analysis over
+          <a href="https://suricata.io/" rel="noopener" style="color: var(--accent);">Suricata</a>
+          IDS/IPS EVE JSON alerts and
+          <a href="https://zeek.org/" rel="noopener" style="color: var(--accent);">Zeek</a>
+          NSM logs: query alerts, flows, and protocol records; analyze connections, DNS, HTTP,
+          TLS, and SSH; and cross-correlate between the two sensors.
+        </p>
+        <p class="mb-4">
+          It exposes 36 tools, 5 resources, and 5 prompts. Beyond raw querying it ships advanced
+          analytics: DGA detection via Shannon entropy, C2 beaconing detection, data-exfiltration
+          and lateral-movement detection. Threat intel is integrated through MISP IOC lookups and
+          TheHive case/alert creation, and PCAPs can be listed and replayed through either engine.
+        </p>
+        <p>
+          The server is read-only by default. Mutating tools (rule writes, ruleset reload, PCAP
+          replay) stay disabled until you both set <code>SURICATA_ALLOW_MUTATION=1</code> and
+          pass <code>confirm: true</code> on the call. Threat-intel HTTP calls use manual redirect
+          handling so a 3xx from a compromised endpoint is refused, not followed with the API key.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">INSTALL</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Published to npm. Install globally to get the <code>suricata-mcp</code> binary, or run
+        it on demand with <code>npx</code>. Requires Node.js 20+ and a Suricata sensor producing
+        EVE JSON logs. Zeek, PCAP, MISP, and TheHive integrations are optional.
+      </p>
+      <div class="term" aria-label="Install suricata-mcp from npm">
+        <div><span class="prompt">$</span> npm i -g suricata-mcp     <span style="color: var(--text-dim);"># install the server binary</span></div>
+        <div><span class="prompt">$</span> npx suricata-mcp          <span style="color: var(--text-dim);"># or run it without installing</span></div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Point <code>SURICATA_EVE_LOG</code> at your EVE JSON log. Set <code>ZEEK_LOGS_DIR</code>,
+        <code>PCAP_DIR</code>, and MISP/TheHive vars to light up the optional tool groups.
+      </p>
+    </section>
+
+    <!-- ============================ CLIENT CONFIG ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CLIENT CONFIG</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A sample <code>mcpServers</code> entry (Claude Desktop, or any MCP client that reads the
+        same shape). It runs the installed binary over stdio.
+      </p>
+      <div class="term" aria-label="Sample MCP client configuration for suricata-mcp">
+        <pre style="margin:0;white-space:pre-wrap;">{`{
+  "mcpServers": {
+    "suricata": {
+      "command": "suricata-mcp",
+      "env": {
+        "SURICATA_EVE_LOG": "/var/log/suricata/eve.json",
+        "SURICATA_RULES_DIR": "/etc/suricata/rules",
+        "ZEEK_LOGS_DIR": "/opt/zeek/logs",
+        "PCAP_DIR": "/opt/pcaps"
+      }
+    }
+  }
+}`}</pre>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        For Claude Code use <code>claude mcp add suricata ... -- suricata-mcp</code>. The repo
+        README also documents OpenClaw, Codex CLI, and Hermes Agent.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CAPABILITIES / TOOLS EXPOSED</h2></div>
+      <p class="max-w-2xl mb-6" style="color: var(--text-muted);">
+        36 MCP tools across Suricata alerts, flows, and protocols, advanced analytics, Zeek NSM
+        analysis, cross-correlation, rules, PCAP, and threat intel. Grouped below; see the
+        README for the full per-argument reference.
+      </p>
+      {toolGroups.map((g) => (
+        <>
+          <p class="cap-group-label">{g.group}</p>
+          <div class="cap-list">
+            {g.tools.map((t) => (
+              <div class="cap">
+                <div class="cap-name">{t.name}</div>
+                <div class="cap-desc">{t.desc}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ))}
+      <p class="text-sm mt-6 max-w-2xl" style="color: var(--text-dim);">
+        Plus 5 resources (event types, current stats, rule summary, sanitized config, Zeek log
+        types) and 5 prompts (investigate-alert, hunt-for-threats, incident-response,
+        network-baseline, daily-alert-report).
+      </p>
+    </section>
+
+    <!-- ============================ SPEC STRIP ============================ -->
+    <section class="mb-10">
+      <div class="spec-strip">
+        <div class="spec"><div class="n">36</div><div class="l">MCP tools</div></div>
+        <div class="spec"><div class="n">5</div><div class="l">resources</div></div>
+        <div class="spec"><div class="n">5</div><div class="l">prompts</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">license</div></div>
+      </div>
+    </section>
+
+  </main>
+</BaseLayout>
+
+<style>
+  .tool-page code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.88em;
+    color: var(--text);
+  }
+</style>

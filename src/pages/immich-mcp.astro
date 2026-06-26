@@ -1,0 +1,229 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'immich-mcp')!;
+const { name, oneLiner, lifecycle, category, repo, npm } = tool;
+
+const pageUrl = 'https://lidless.dev/immich-mcp';
+const title = 'Immich MCP server - drive your photo library with AI';
+const description =
+  'immich-mcp is an open-source MCP server for Immich. Browse and semantic-search assets, manage albums, tags, and people, surface memories, and resolve duplicates from Claude or any MCP client over stdio.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name,
+    siteUrl: pageUrl,
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: repo,
+    softwareVersion: '0.5.0',
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass =
+  lifecycle === 'Active'
+    ? 'badge badge-active'
+    : lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+// Capabilities, grouped across the 11 domains the README documents.
+const toolGroups: { group: string; tools: { name: string; desc: string }[] }[] = [
+  {
+    group: 'System (5)',
+    tools: [
+      { name: 'immich_ping / immich_get_server_info', desc: 'Health check plus version, build, and features.' },
+      { name: 'get_server_statistics / get_storage / get_capabilities', desc: 'Photo and video counts, disk usage and free space, and exposed feature flags.' },
+    ],
+  },
+  {
+    group: 'Assets (11)',
+    tools: [
+      { name: 'list_assets / get_asset / get_asset_exif / get_asset_statistics', desc: 'Paginated filtered listing, full metadata, EXIF block, and per-library counts.' },
+      { name: 'update_asset / bulk_update_assets', desc: 'Rename, favorite, archive, set description; bulk updates require confirm: true.' },
+      { name: 'delete_asset / restore_from_trash', desc: 'Soft delete to trash by default (permanent delete requires confirm: true), and undo.' },
+      { name: 'download_original / download_thumbnail / upload_from_path', desc: 'Return original or preview bytes; upload is confined to IMMICH_UPLOAD_BASE_DIR.' },
+    ],
+  },
+  {
+    group: 'Search (3)',
+    tools: [
+      { name: 'immich_search_smart', desc: 'CLIP / semantic search by natural-language query.' },
+      { name: 'immich_search_metadata', desc: 'Structured search by date range, camera make, location, and more.' },
+      { name: 'immich_search_explore', desc: 'Server-side discovery feed (cities, people, things).' },
+    ],
+  },
+  {
+    group: 'Albums (8) & tags (7)',
+    tools: [
+      { name: 'albums: list / get / statistics / create / update / add / remove / delete', desc: 'Full album lifecycle; delete_album requires confirm: true.' },
+      { name: 'tags: list / get / create / update / delete / add-to / remove-from', desc: 'Manage tags and apply them to assets; delete_tag requires confirm: true.' },
+    ],
+  },
+  {
+    group: 'People (6)',
+    tools: [
+      { name: 'list_people / get_person / get_person_assets', desc: 'Enumerate faces and the photos and videos each appears in.' },
+      { name: 'update_person / hide_person / merge_people', desc: 'Rename, set birth date or thumbnail, hide from discovery, and fold duplicate clusters (merge requires confirm: true).' },
+    ],
+  },
+  {
+    group: 'Shared links, activities, memories, duplicates & stacks',
+    tools: [
+      { name: 'shared_links + activities', desc: 'Create, read, update, and delete shared links and shared-album comments/likes (deletes require confirm: true).' },
+      { name: 'list_memories / get_memory', desc: '"On this day" and other generated memories.' },
+      { name: 'list_duplicates / resolve_duplicates', desc: 'Surface duplicate clusters, then pick a keeper and trash the rest (resolve requires confirm: true).' },
+      { name: 'stacks: list / create / update / delete', desc: 'Group motion photos, bracketed shots, and RAW+JPEG pairs (delete requires confirm: true).' },
+    ],
+  },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="tool-page px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- breadcrumb / back to hub -->
+    <nav class="kicker mb-7" aria-label="Breadcrumb">
+      <a href="/" style="color: var(--text-dim); text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / {category} / {name}</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark text-4xl md:text-5xl m-0">{name}</h1>
+        <span class={badgeClass}>{lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={repo} rel="noopener">GitHub repo &rarr;</a>
+        {npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${npm}`} rel="noopener">npm: {npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+      <div class="spec-strip mt-7 max-w-2xl text-left">
+        <div class="spec"><div class="n">~55</div><div class="l">MCP tools</div></div>
+        <div class="spec"><div class="n">11</div><div class="l">domains</div></div>
+        <div class="spec"><div class="n">stdio</div><div class="l">transport</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">license</div></div>
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <div class="max-w-2xl" style="color: var(--text-muted);">
+        <p class="mb-4">
+          <code>immich-mcp</code> is a Model Context Protocol server for
+          <a href="https://immich.app" rel="noopener" style="color: var(--accent);">Immich</a>.
+          Point an MCP-compatible client at it and your photo and video library becomes a set of
+          tools the agent can call: browse and search assets, manage albums and tags, recognize
+          and merge people, surface memories, resolve duplicates, and group motion photos into
+          stacks, all as typed tool calls.
+        </p>
+        <p class="mb-4">
+          It exposes roughly 55 tools across 11 domains, with memories, duplicates, and stacks
+          supported out of the box. Search covers CLIP / semantic queries
+          (<code>immich_search_smart</code>) plus structured metadata search and the discovery
+          "explore" feed.
+        </p>
+        <p>
+          Two-tier write protection keeps the library safe: all writes are gated behind the
+          <code>IMMICH_ALLOW_WRITES=true</code> env var, and destructive tools additionally
+          require <code>confirm: true</code> on each call. Reads always work. Path-based uploads
+          are confined to an opt-in <code>IMMICH_UPLOAD_BASE_DIR</code>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">INSTALL</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Published to npm. Install globally to get the <code>immich-mcp</code> binary, or build
+        from source. Requires Node.js 20+ and an Immich server with API access.
+      </p>
+      <div class="term" aria-label="Install immich-mcp">
+        <div><span class="prompt">$</span> npm install -g immich-mcp        <span style="color: var(--text-dim);"># install the server binary</span></div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># or from source</span></div>
+        <div><span class="prompt">$</span> git clone https://github.com/lidless-labs/immich-mcp.git</div>
+        <div><span class="prompt">$</span> cd immich-mcp &amp;&amp; npm install &amp;&amp; npm run build</div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Configure with <code>IMMICH_BASE_URL</code> (note the <code>/api</code> suffix) and
+        <code>IMMICH_API_KEY</code> (Account Settings &rsaquo; API Keys). Set
+        <code>IMMICH_ALLOW_WRITES=true</code> to expose write and delete tools;
+        <code>IMMICH_UPLOAD_BASE_DIR</code> to allow path-based uploads;
+        <code>IMMICH_VERIFY_SSL=false</code> only for self-signed certs (scoped to the Immich
+        client alone).
+      </p>
+    </section>
+
+    <!-- ============================ CLIENT CONFIG ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CLIENT CONFIG</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A sample <code>mcpServers</code> entry (Claude Desktop, or any MCP client that reads the
+        same shape). It runs the installed binary over stdio. Leave
+        <code>IMMICH_ALLOW_WRITES</code> at <code>"false"</code> until you want write tools.
+      </p>
+      <div class="term" aria-label="Sample MCP client configuration for immich-mcp">
+        <pre style="margin:0;white-space:pre-wrap;">{`{
+  "mcpServers": {
+    "immich-mcp": {
+      "command": "immich-mcp",
+      "env": {
+        "IMMICH_BASE_URL": "https://photos.example.com/api",
+        "IMMICH_API_KEY": "YOUR_KEY",
+        "IMMICH_ALLOW_WRITES": "false"
+      }
+    }
+  }
+}`}</pre>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        For Claude Code use <code>claude mcp add immich-mcp -e IMMICH_BASE_URL=... -e
+        IMMICH_API_KEY=... -e IMMICH_ALLOW_WRITES=false -- immich-mcp</code>. The README also
+        documents OpenClaw, Codex CLI, and Hermes Agent, including source-checkout variants.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CAPABILITIES / TOOLS EXPOSED</h2></div>
+      <p class="max-w-2xl mb-6" style="color: var(--text-muted);">
+        Roughly 55 MCP tools across 11 domains. Grouped below; see the README for the full
+        per-argument reference.
+      </p>
+      {toolGroups.map((g) => (
+        <>
+          <p class="cap-group-label">{g.group}</p>
+          <div class="cap-list">
+            {g.tools.map((t) => (
+              <div class="cap">
+                <div class="cap-name">{t.name}</div>
+                <div class="cap-desc">{t.desc}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ))}
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .tool-page code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.88em;
+    color: var(--text);
+  }
+</style>

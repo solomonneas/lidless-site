@@ -1,0 +1,225 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'maltego-mcp')!;
+const { name, oneLiner, lifecycle, category, repo, npm } = tool;
+
+const pageUrl = 'https://lidless.dev/maltego-mcp';
+const title = 'Maltego MCP server - author OSINT graphs with AI';
+const description =
+  'maltego-mcp lets an AI client author Maltego .mtgx graph files and run primitive OSINT lookups (whois / DNS / ASN / crt.sh), plus optional Python TRX transforms for in-Maltego pivots.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name,
+    siteUrl: pageUrl,
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: repo,
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass =
+  lifecycle === 'Active'
+    ? 'badge badge-active'
+    : lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+// Capabilities, grouped as the README documents them (Phase A tools).
+const toolGroups: { group: string; tools: { name: string; desc: string }[] }[] = [
+  {
+    group: 'Graph authoring',
+    tools: [
+      { name: 'maltego_create_graph', desc: 'Start a new graph; returns a graphId handle.' },
+      { name: 'maltego_add_entity / maltego_add_link', desc: 'Add typed entities and links between them; each returns an id.' },
+      { name: 'maltego_save_graph / maltego_load_graph', desc: 'Write a handle to a .mtgx file on disk, or parse an existing .mtgx into a new handle.' },
+    ],
+  },
+  {
+    group: 'Primitive lookups',
+    tools: [
+      { name: 'maltego_whois', desc: 'Registrar, nameservers, and registration dates for a domain.' },
+      { name: 'maltego_dns', desc: 'A / AAAA / MX / NS / TXT records for a domain.' },
+      { name: 'maltego_asn', desc: 'Team Cymru ASN, prefix, country, and org for an IP.' },
+      { name: 'maltego_crtsh', desc: 'Certificate-transparency log entries for a domain.' },
+    ],
+  },
+  {
+    group: 'Convenience expanders',
+    tools: [
+      { name: 'maltego_expand_ip', desc: 'IP plus ASN and netblock, saved straight to .mtgx.' },
+      { name: 'maltego_expand_domain', desc: 'Domain plus whois, DNS, and ASN per A record, saved to .mtgx.' },
+      { name: 'maltego_expand_hash', desc: 'Hash entity scaffold for later enrichment.' },
+      { name: 'maltego_build_ioc_graph', desc: 'One IOC plus enrichment summaries from other MCPs, saved as a single .mtgx.' },
+    ],
+  },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="tool-page px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- breadcrumb / back to hub -->
+    <nav class="kicker mb-7" aria-label="Breadcrumb">
+      <a href="/" style="color: var(--text-dim); text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / {category} / {name}</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark text-4xl md:text-5xl m-0">{name}</h1>
+        <span class={badgeClass}>{lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={repo} rel="noopener">GitHub repo &rarr;</a>
+        {npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${npm}`} rel="noopener">npm: {npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <div class="max-w-2xl" style="color: var(--text-muted);">
+        <p class="mb-4">
+          <code>maltego-mcp</code> is two cooperating layers for
+          <a href="https://www.maltego.com/products/maltego-graph/" rel="noopener" style="color: var(--accent);">Maltego Graph Desktop</a>.
+          Phase A is a Model Context Protocol server: point an MCP-compatible client at it and the
+          assistant can author Maltego <code>.mtgx</code> graph files and run primitive OSINT
+          lookups (whois, DNS, ASN, certificate transparency). Graphs land on disk and you open
+          them in Maltego Desktop.
+        </p>
+        <p class="mb-4">
+          Phase B is an optional Python TRX transform pack shipped as a <code>.mtz</code>. It adds
+          right-click pivots into MISP, TheHive, Cortex, and the bundled MITRE ATT&amp;CK dataset
+          directly inside Maltego Desktop. The two phases share the repo and nothing else, so
+          either layer can be uninstalled without breaking the other.
+        </p>
+        <p>
+          The server does not embed third-party threat-intel clients. For MISP events, ATT&amp;CK
+          techniques, and Cortex reports, call the dedicated MCPs (<code>misp-mcp</code>,
+          <code>mitre-mcp</code>, <code>cortex-mcp</code>) and pipe results into
+          <code>maltego_add_entity</code> / <code>maltego_add_link</code>, or use
+          <code>maltego_build_ioc_graph</code> to fold those summaries into one combined graph.
+        </p>
+      </div>
+      <p class="max-w-2xl mt-4 text-sm" style="color: var(--wip);">
+        Status: work in progress. Phase A is published to npm; the surface may keep shifting as
+        Phase B transforms mature. The Basic-friendly demo graph stays under 24 entities to
+        respect Maltego Basic's per-transform result limit.
+      </p>
+    </section>
+
+    <!-- ============================ INSTALL ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">INSTALL</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Phase A is published to npm. Install globally to get the <code>maltego-mcp</code> binary.
+        Requires Node.js 20+ and Maltego Graph Desktop (Basic, Pro, or Enterprise) for the graphs
+        to be useful.
+      </p>
+      <div class="term" aria-label="Install maltego-mcp from npm">
+        <div><span class="prompt">$</span> npm install -g maltego-mcp</div>
+      </div>
+      <p class="max-w-2xl mt-5 mb-4" style="color: var(--text-muted);">
+        Phase B transforms require a source checkout and Python 3.11+ on the Maltego host.
+      </p>
+      <div class="term" aria-label="Install maltego-mcp from source for Phase B">
+        <div><span class="prompt">$</span> git clone https://github.com/solomonneas/maltego-mcp.git</div>
+        <div><span class="prompt">$</span> cd maltego-mcp</div>
+        <div><span class="prompt">$</span> npm install &amp;&amp; npm run build</div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># Phase B: build the .mtz transform pack</span></div>
+        <div><span class="prompt">$</span> npm run setup:transforms     <span style="color: var(--text-dim);"># venv with maltego-trx pinned</span></div>
+        <div><span class="prompt">$</span> npm run build:mtz            <span style="color: var(--text-dim);"># writes dist/maltego-mcp-transforms.mtz</span></div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Both env vars are optional: <code>MALTEGO_MCP_OUTPUT_DIR</code> (default
+        <code>~/MaltegoGraphs</code>) sets where <code>.mtgx</code> files are written, and
+        <code>MALTEGO_MCP_LOOKUP_TIMEOUT_MS</code> (default <code>30000</code>) caps the
+        <code>crt.sh</code> lookup. The <code>.mtz</code> bakes in the absolute venv path, so
+        rebuild it if the repo moves.
+      </p>
+    </section>
+
+    <!-- ============================ CLIENT CONFIG ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CLIENT CONFIG</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A sample <code>mcpServers</code> entry (Claude Desktop, or any MCP client that reads the
+        same shape). It runs the installed binary over stdio with no required env.
+      </p>
+      <div class="term" aria-label="Sample MCP client configuration for maltego-mcp">
+        <pre style="margin:0;white-space:pre-wrap;">{`{
+  "mcpServers": {
+    "maltego": {
+      "command": "maltego-mcp"
+    }
+  }
+}`}</pre>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        For Claude Code use <code>claude mcp add maltego -- maltego-mcp</code>. The repo README
+        also documents OpenClaw (including a ClawHub plugin install), Codex CLI, and Hermes Agent,
+        plus source-checkout variants that run <code>node dist/mcp-server.js</code>.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CAPABILITIES / TOOLS EXPOSED</h2></div>
+      <p class="max-w-2xl mb-6" style="color: var(--text-muted);">
+        Phase A exposes graph-authoring tools, primitive OSINT lookups, and convenience expanders.
+        Entities use the standard Maltego ontology (IPv4Address, Domain, URL, Hash, AS, Netblock,
+        and so on); use <code>Phrase</code> with a category prefix for concepts without a standard
+        type. Grouped below; see the README for the full per-argument reference.
+      </p>
+      {toolGroups.map((g) => (
+        <>
+          <p class="cap-group-label">{g.group}</p>
+          <div class="cap-list">
+            {g.tools.map((t) => (
+              <div class="cap">
+                <div class="cap-name">{t.name}</div>
+                <div class="cap-desc">{t.desc}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ))}
+      <p class="text-sm mt-6 max-w-2xl" style="color: var(--text-dim);">
+        Phase B adds right-click TRX transforms inside Maltego Desktop: pivots into MISP, TheHive,
+        Cortex, and the bundled ATT&amp;CK dataset. See <code>transforms/README.md</code> in the repo.
+      </p>
+    </section>
+
+    <!-- ============================ SPEC STRIP ============================ -->
+    <section class="mb-10">
+      <div class="spec-strip">
+        <div class="spec"><div class="n">.mtgx</div><div class="l">graph output</div></div>
+        <div class="spec"><div class="n">.mtz</div><div class="l">Phase B transforms</div></div>
+        <div class="spec"><div class="n">stdio</div><div class="l">MCP transport</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">license</div></div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .tool-page code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.88em;
+    color: var(--text);
+  }
+</style>

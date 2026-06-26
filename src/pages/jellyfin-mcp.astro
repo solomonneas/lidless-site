@@ -1,0 +1,228 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'jellyfin-mcp')!;
+const { name, oneLiner, lifecycle, category, repo, npm } = tool;
+
+const pageUrl = 'https://lidless.dev/jellyfin-mcp';
+const title = 'Jellyfin MCP server - control your media server with AI';
+const description =
+  'jellyfin-mcp is an open-source MCP server for Jellyfin. List who is watching, pause a session, scan a library, run scheduled tasks, and manage users from Claude or any MCP client over stdio.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name,
+    siteUrl: pageUrl,
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: repo,
+    softwareVersion: '0.4.0',
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass =
+  lifecycle === 'Active'
+    ? 'badge badge-active'
+    : lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+// Capabilities, grouped as the README documents them.
+const toolGroups: { group: string; tools: { name: string; desc: string }[] }[] = [
+  {
+    group: 'System & libraries',
+    tools: [
+      { name: 'jellyfin_get_status', desc: 'Server name, version, OS, pending restart, and update availability.' },
+      { name: 'jellyfin_list_libraries / jellyfin_scan_library', desc: 'List virtual folders with IDs and types; trigger a scan for one library or all.' },
+      { name: 'jellyfin_restart_server / jellyfin_shutdown_server', desc: 'Restart or stop the Jellyfin process (each requires confirm: true).' },
+    ],
+  },
+  {
+    group: 'Sessions & playback',
+    tools: [
+      { name: 'jellyfin_list_sessions', desc: 'Active/idle clients with now-playing, progress, and paused state.' },
+      { name: 'pause / resume / stop / seek / next / previous', desc: 'Per-session transport control, plus volume, mute, audio-stream, and subtitle-stream.' },
+      { name: 'jellyfin_play_on_session', desc: 'Cast or remote-play items to a session (PlayNow / PlayNext / PlayLast).' },
+      { name: 'send_message_to_session / *_all_sessions', desc: 'Toast a client; bulk pause/stop/message matching sessions (bulk ops require confirm: true).' },
+    ],
+  },
+  {
+    group: 'User data & discovery',
+    tools: [
+      { name: 'mark_played / mark_unplayed / set_favorite', desc: 'Per-user watched state and favorites.' },
+      { name: 'continue-watching clears + preview', desc: 'Preview a cleanup dry-run, then clear resume positions per item, per series, or all-but-latest (writes require confirm: true).' },
+      { name: 'get_resume_items / get_next_up / get_similar_items', desc: 'In-progress queue, next unwatched episode per series, and similar-item recommendations.' },
+    ],
+  },
+  {
+    group: 'Items, playlists & collections',
+    tools: [
+      { name: 'search_items / get_recent_items / get_item', desc: 'Search by name, latest-added per user, and full metadata.' },
+      { name: 'playlists: create / list / get / add / remove', desc: 'Use the returned playlistEntryId for removal, not the raw item ID.' },
+      { name: 'collections: create / add / remove', desc: 'Build and curate Jellyfin collections.' },
+    ],
+  },
+  {
+    group: 'Users, tasks & Quick Connect',
+    tools: [
+      { name: 'list / create / delete / disable / set_password', desc: 'User admin (delete and set_password require confirm: true).' },
+      { name: 'list_scheduled_tasks / run_scheduled_task / get_activity_log', desc: 'Inspect and run scheduled tasks; query recent server events.' },
+      { name: 'quick_connect_status / quick_connect_authorize', desc: 'Check Quick Connect and approve a pending login code (authorize requires confirm: true).' },
+    ],
+  },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="tool-page px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- breadcrumb / back to hub -->
+    <nav class="kicker mb-7" aria-label="Breadcrumb">
+      <a href="/" style="color: var(--text-dim); text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / {category} / {name}</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark text-4xl md:text-5xl m-0">{name}</h1>
+        <span class={badgeClass}>{lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={repo} rel="noopener">GitHub repo &rarr;</a>
+        {npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${npm}`} rel="noopener">npm: {npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+      <div class="spec-strip mt-7 max-w-2xl text-left">
+        <div class="spec"><div class="n">56</div><div class="l">MCP tools</div></div>
+        <div class="spec"><div class="n">stdio</div><div class="l">transport</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">license</div></div>
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <div class="max-w-2xl" style="color: var(--text-muted);">
+        <p class="mb-4">
+          <code>jellyfin-mcp</code> is a Model Context Protocol server for
+          <a href="https://jellyfin.org" rel="noopener" style="color: var(--accent);">Jellyfin</a>.
+          Point an MCP-compatible client at it and your media server becomes a set of tools the
+          agent can call: list who is watching what, pause a session, scan a library, run a
+          scheduled task, message a client, or manage users, all as typed tool calls.
+        </p>
+        <p class="mb-4">
+          It exposes 56 tools across system info, libraries, users, sessions, items, scheduled
+          tasks, user-data writes, playlists, collections, discovery, and Quick Connect.
+          Destructive or privileged operations (restart, shutdown, delete_user,
+          set_user_password, Quick Connect authorize, Continue Watching clears, bulk session
+          controls, resume-position writes) require an explicit <code>confirm: true</code>.
+        </p>
+        <p>
+          Upstream Jellyfin error responses are summarized to status only before being returned
+          to the model; the full body is logged to stderr for operators, so internal server
+          detail is not surfaced to the assistant.
+        </p>
+      </div>
+      <p class="max-w-2xl mt-4 text-sm" style="color: var(--warn);">
+        Status: work in progress. Published to npm as <code>jellyfin-mcp</code> (v0.4.0);
+        expect the tool surface to keep shifting while it stabilizes.
+      </p>
+    </section>
+
+    <!-- ============================ INSTALL ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">INSTALL</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Published to npm. Install globally to get the <code>jellyfin-mcp</code> binary, or build
+        from source. Requires Node.js 20+ and a Jellyfin server with API access.
+      </p>
+      <div class="term" aria-label="Install jellyfin-mcp">
+        <div><span class="prompt">$</span> npm install -g jellyfin-mcp        <span style="color: var(--text-dim);"># install the server binary</span></div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># or from source</span></div>
+        <div><span class="prompt">$</span> git clone https://github.com/solomonneas/jellyfin-mcp.git</div>
+        <div><span class="prompt">$</span> cd jellyfin-mcp &amp;&amp; npm install &amp;&amp; npm run build</div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Configure with <code>JELLYFIN_URL</code> and <code>JELLYFIN_API_KEY</code> (Dashboard
+        &rsaquo; API Keys). Optional: <code>JELLYFIN_TIMEOUT</code> (default 30s) and
+        <code>JELLYFIN_VERIFY_SSL</code> (set <code>false</code> only for self-signed certs;
+        the relaxed check is scoped to the Jellyfin connection alone).
+      </p>
+    </section>
+
+    <!-- ============================ CLIENT CONFIG ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CLIENT CONFIG</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A sample <code>mcpServers</code> entry (Claude Desktop, or any MCP client that reads the
+        same shape). It runs the installed binary over stdio.
+      </p>
+      <div class="term" aria-label="Sample MCP client configuration for jellyfin-mcp">
+        <pre style="margin:0;white-space:pre-wrap;">{`{
+  "mcpServers": {
+    "jellyfin": {
+      "command": "jellyfin-mcp",
+      "env": {
+        "JELLYFIN_URL": "http://localhost:8096",
+        "JELLYFIN_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}`}</pre>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        For Claude Code use <code>claude mcp add jellyfin --env JELLYFIN_URL=... --env
+        JELLYFIN_API_KEY=... -- jellyfin-mcp</code>. The README also documents OpenClaw, Codex
+        CLI, and Hermes Agent, plus an SSH-tunnel recipe for a remote Jellyfin bound to
+        localhost.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CAPABILITIES / TOOLS EXPOSED</h2></div>
+      <p class="max-w-2xl mb-6" style="color: var(--text-muted);">
+        56 MCP tools across system, libraries, sessions and playback, user data, items,
+        playlists, collections, discovery, users, tasks, and Quick Connect. Grouped below; see
+        the README for the full per-argument reference.
+      </p>
+      {toolGroups.map((g) => (
+        <>
+          <p class="cap-group-label">{g.group}</p>
+          <div class="cap-list">
+            {g.tools.map((t) => (
+              <div class="cap">
+                <div class="cap-name">{t.name}</div>
+                <div class="cap-desc">{t.desc}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ))}
+      <p class="text-sm mt-6 max-w-2xl" style="color: var(--warn);">
+        Note: <code>jellyfin_set_user_password</code> takes the new password as plaintext tool
+        input, so it transits the LLM conversation and provider logs. Treat any password set
+        this way as exposed: use a throwaway value or set passwords in the Jellyfin dashboard.
+      </p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .tool-page code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.88em;
+    color: var(--text);
+  }
+</style>

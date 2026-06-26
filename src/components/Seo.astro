@@ -1,0 +1,71 @@
+---
+// Shared SEO <head> for the Escoffier Labs fleet.
+//
+// SOURCE OF TRUTH: escoffier-fleet-kit/seo/Seo.astro
+// Copied into each *-site repo (src/components/Seo.astro) by bin/fleet-sync.sh.
+// Do NOT edit the copy in a site repo; edit it here and re-run fleet-sync.
+//
+// Drop <Seo .../> as the first child of <head>. Each site's BaseLayout keeps its own
+// charset/viewport/favicon/analytics/theme-init; this component owns everything SEO:
+// title, description, robots, theme-color, canonical, Open Graph, Twitter, JSON-LD.
+import { FLEET, canonicalFor, absoluteImage, type SeoProps } from '../lib/seo.ts';
+
+const {
+  siteName,
+  title,
+  description,
+  ogImage,
+  ogType = 'website',
+  publishedDate,
+  modifiedDate,
+  tags = [],
+  keywords = [],
+  jsonLd,
+  noindex = false,
+  markdownAlt,
+} = Astro.props as SeoProps;
+
+const siteUrl = (Astro.site ?? new URL(FLEET.hub)).toString();
+const canonical = canonicalFor(siteUrl, Astro.url.pathname);
+const image = absoluteImage(siteUrl, ogImage);
+const isPreview = import.meta.env.DEV || import.meta.env.VERCEL_ENV === 'preview';
+const robots = noindex || isPreview ? 'noindex, nofollow' : 'index, follow';
+const ldNodes = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={FLEET.author} />
+{keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
+<meta name="robots" content={robots} />
+<meta name="theme-color" content={FLEET.themeColor.dark} media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content={FLEET.themeColor.light} media="(prefers-color-scheme: light)" />
+<link rel="canonical" href={canonical} />
+
+<!-- Open Graph -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:image" content={image} />
+<meta property="og:image:alt" content={`${siteName} - ${description}`} />
+<meta property="og:image:width" content={String(FLEET.ogImage.width)} />
+<meta property="og:image:height" content={String(FLEET.ogImage.height)} />
+<meta property="og:image:type" content={FLEET.ogImage.type} />
+{publishedDate && <meta property="article:published_time" content={publishedDate} />}
+{modifiedDate && <meta property="article:modified_time" content={modifiedDate} />}
+{tags.map((t) => <meta property="article:tag" content={t} />)}
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content={FLEET.twitter} />
+<meta name="twitter:creator" content={FLEET.twitter} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+
+{markdownAlt && <link rel="alternate" type="text/markdown" href={markdownAlt} />}
+
+{ldNodes.map((node) => (
+  <script type="application/ld+json" set:html={JSON.stringify(node).replace(/</g, '\\u003c')} />
+))}

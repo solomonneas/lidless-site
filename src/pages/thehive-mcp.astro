@@ -1,0 +1,181 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS, type Lifecycle } from '../lib/tools.ts';
+import {
+  composeTitle,
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+// Look up this tool by slug so name/lifecycle/repo/npm stay in sync with the hub grid.
+const tool = TOOLS.find((t) => t.slug === 'thehive-mcp')!;
+const { name, oneLiner, lifecycle, repo, npm } = tool;
+
+const SITE_URL = 'https://lidless.dev';
+const pageUrl = `${SITE_URL}/thehive-mcp`;
+
+const title = composeTitle('TheHive MCP server', 'incident response for AI agents');
+const description =
+  'thehive-mcp is an open-source MCP server for TheHive 5: 47 tools that let AI agents create cases, triage alerts, track observables, and run Cortex analyzers.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name,
+    siteUrl: pageUrl,
+    description,
+    image: absoluteImage(SITE_URL, '/og-card.png'),
+    codeRepository: repo,
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass = (l: Lifecycle) =>
+  l === 'Active'
+    ? 'badge badge-active'
+    : l === 'WIP'
+    ? 'badge badge-wip'
+    : 'badge badge-experimental';
+
+// Tools exposed, grouped from the README's surface (47 total).
+const toolGroups: { group: string; tools: string[] }[] = [
+  {
+    group: 'Cases (16)',
+    tools: [
+      'list / get / create / update / search cases',
+      'close, assign, tag, flag, bulk assign + close',
+      'timeline summary, custom fields, delete, merge (gated)',
+    ],
+  },
+  {
+    group: 'Alerts (6)',
+    tools: ['list / get / create / update alerts', 'promote to case + delete (gated)'],
+  },
+  {
+    group: 'Tasks + logs (6)',
+    tools: ['list / get / create / update tasks', 'list + add task log entries'],
+  },
+  {
+    group: 'Observables (5)',
+    tools: ['list / get / create observables', 'bulk create, search across all cases'],
+  },
+  {
+    group: 'Cortex (7)',
+    tools: [
+      'list analyzers, find enrichment options',
+      'run analyzer, run-and-wait, poll job, summarize report',
+    ],
+  },
+  {
+    group: 'Comments, users, query, status',
+    tools: [
+      'list + add case comments',
+      'list users, get current user',
+      'guarded raw Query DSL (gated), case templates, server status',
+    ],
+  },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- breadcrumb / back to hub -->
+    <p class="kicker mb-6">
+      <a href="/" style="color: var(--text-dim); text-decoration: none;">&larr; Lidless</a>
+      &nbsp;/&nbsp; SECURITY / SOC &nbsp;/&nbsp; {name}
+    </p>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap mb-3">
+        <h1 class="wordmark font-display text-4xl md:text-5xl uppercase m-0">{name}</h1>
+        <span class={badgeClass(lifecycle)}>{lifecycle}</span>
+      </div>
+      <p class="text-lg max-w-2xl" style="color: var(--text-muted);">{oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={tool.repo} rel="noopener">GitHub repo &rarr;</a>
+        {tool.npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${tool.npm}`} rel="noopener">npm: {tool.npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <div class="max-w-2xl" style="color: var(--text-muted);">
+        <p class="mb-4">
+          thehive-mcp is a Model Context Protocol server for
+          <a href="https://thehive-project.org/" rel="noopener" style="color: var(--accent);">TheHive</a>,
+          the open-source security incident response platform. Point an AI client at it and TheHive
+          becomes a set of tools the agent can call: create and triage cases, manage alerts, track
+          observables, run Cortex analyzers, and orchestrate incident response workflows.
+        </p>
+        <p class="mb-4">
+          It exposes 47 tools across the full TheHive 5 API surface, plus prompt templates and
+          resources for open cases, new alerts, and the current user. It is tested against
+          TheHive 5.4.11 with live read, write, and destructive coverage.
+        </p>
+        <p>
+          Destructive and irreversible operations (delete case, delete alert, merge, promote, raw
+          query) are gated behind explicit environment flags and off by default, so an agent cannot
+          wipe a case without you opting in.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">INSTALL</h2></div>
+      <div class="term" aria-label="Install command">
+        <div><span class="prompt">$</span> npm install -g thehive-mcp <span style="color: var(--text-dim);"># install the binary</span></div>
+        <div><span class="prompt">$</span> npx thehive-mcp <span style="color: var(--text-dim);"># or run it directly</span></div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Requires Node.js 20+. Set <span class="font-mono">THEHIVE_URL</span> and
+        <span class="font-mono">THEHIVE_API_KEY</span> for your instance. Add
+        <span class="font-mono">THEHIVE_ALLOW_DESTRUCTIVE_TOOLS=true</span> only when you want to
+        enable delete/merge/promote tools.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">TOOLS EXPOSED</h2></div>
+      {toolGroups.map((g) => (
+        <>
+          <p class="cap-group-label">{g.group}</p>
+          <div class="cap-list">
+            {g.tools.map((t) => (
+              <div class="cap">
+                <div class="cap-desc">{t}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ))}
+    </section>
+
+    <!-- ============================ CLIENT CONFIG ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CLIENT CONFIG</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A sample <span class="font-mono">mcpServers</span> entry for an MCP client such as Claude
+        Desktop. The server speaks MCP over stdio.
+      </p>
+      <pre class="term" aria-label="MCP client configuration"><code>{`{
+  "mcpServers": {
+    "thehive": {
+      "command": "thehive-mcp",
+      "env": {
+        "THEHIVE_URL": "http://your-thehive:9000",
+        "THEHIVE_API_KEY": "your-api-key"
+      }
+    }
+  }
+}`}</code></pre>
+    </section>
+
+  </main>
+</BaseLayout>

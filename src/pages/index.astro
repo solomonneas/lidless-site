@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, EXTERNAL } from '../lib/site.ts';
+import { TOOLS, CATEGORY_ORDER, type Lifecycle } from '../lib/tools.ts';
+import { graph, organizationLd, websiteLd } from '../lib/seo.ts';
+
+// Homepage JSON-LD: who we are + this site.
+const jsonLd = graph([organizationLd(), websiteLd('Lidless', 'https://lidless.dev')]);
+
+// Lifecycle -> watch-list mark class (dot + label, no badge chrome).
+const lifeClass = (l: Lifecycle) =>
+  l === 'Active' ? 'life life-active' : l === 'WIP' ? 'life life-wip' : 'life life-exp';
+
+const total = TOOLS.length;
+const categories = CATEGORY_ORDER.length;
+
+// Section anchors + ordinals per category, matching the nav.
+const CAT_ANCHOR: Record<string, string> = {
+  'Security / SOC': 'security',
+  Network: 'network',
+  Homelab: 'homelab',
+};
+const CAT_NUM: Record<string, string> = {
+  'Security / SOC': '01',
+  Network: '02',
+  Homelab: '03',
+};
+---
+<BaseLayout title={SITE.seoTitle} description={SITE.metaDescription} jsonLd={jsonLd}>
+  <main>
+    <!-- ============================ HERO ============================ -->
+    <header class="hero px-6 md:px-10 pt-20 pb-16 max-w-3xl mx-auto text-center flex flex-col items-center">
+      <p class="kicker m-0">LIDLESS LABS &middot; CONSTANT VIGILANCE</p>
+
+      <!-- the dimensional, unsleeping eye: brass socket, white sclera, blue iris.
+           the eyeball group follows your cursor. no radar, no glow. -->
+      <svg class="lid-eye mt-6" viewBox="0 0 120 120" width="158" height="158"
+        role="img" aria-label="The Lidless eye - follows your cursor. Constant vigilance.">
+        <defs>
+          <radialGradient id="ls" cx="40%" cy="34%" r="74%"><stop offset="0%" stop-color="#fbfdfe"/><stop offset="44%" stop-color="#dde4e9"/><stop offset="80%" stop-color="#aeb8bf"/><stop offset="100%" stop-color="#828c93"/></radialGradient>
+          <radialGradient id="li" cx="46%" cy="40%" r="62%"><stop offset="0%" stop-color="#bfe6ff"/><stop offset="36%" stop-color="#5aa6e0"/><stop offset="76%" stop-color="#286ead"/><stop offset="100%" stop-color="#0c2a4a"/></radialGradient>
+          <linearGradient id="brassG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ecce82"/><stop offset="34%" stop-color="#c69d46"/><stop offset="68%" stop-color="#8a6e2e"/><stop offset="100%" stop-color="#574418"/></linearGradient>
+          <radialGradient id="innerShadow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#070b11" stop-opacity="0"/><stop offset="74%" stop-color="#070b11" stop-opacity="0"/><stop offset="100%" stop-color="#070b11" stop-opacity="0.6"/></radialGradient>
+          <radialGradient id="irisHi" cx="38%" cy="30%" r="45%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+          <clipPath id="lc"><circle cx="60" cy="60" r="43"/></clipPath>
+        </defs>
+        <g transform="rotate(-34 60 60)"><line x1="60" y1="13" x2="60" y2="7" stroke="url(#brassG)" stroke-width="2.8" stroke-linecap="round"/><rect x="55" y="1.5" width="10" height="5" rx="1.3" fill="#0a0e15" stroke="url(#brassG)" stroke-width="1.8"/></g>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#brassG)" stroke-width="6"/>
+        <circle cx="60" cy="60" r="53" fill="none" stroke="#33280a" stroke-width="0.9" opacity="0.7"/>
+        <circle cx="60" cy="60" r="47.2" fill="none" stroke="#241c08" stroke-width="1.6" opacity="0.6"/>
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#f2da92" stroke-width="0.6" opacity="0.45"/>
+        <g fill="url(#brassG)" stroke="#3d3008" stroke-width="0.4"><circle cx="60" cy="12.5" r="2.2"/><circle cx="107.5" cy="60" r="2.2"/><circle cx="60" cy="107.5" r="2.2"/><circle cx="12.5" cy="60" r="2.2"/></g>
+        <circle cx="60" cy="60" r="44" fill="url(#ls)"/>
+        <g clip-path="url(#lc)"><g class="eyeball">
+          <circle cx="60" cy="60" r="17" fill="url(#li)"/>
+          <circle cx="60" cy="60" r="17" fill="none" stroke="#0a2540" stroke-width="1.7" opacity="0.9"/>
+          <circle cx="60" cy="60" r="7.6" fill="#040e1b"/>
+          <circle cx="60" cy="60" r="7.6" fill="none" stroke="#000" stroke-width="0.8" opacity="0.45"/>
+          <ellipse cx="55" cy="53" rx="4.6" ry="3" fill="url(#irisHi)"/>
+          <circle cx="63.6" cy="55.4" r="2.5" fill="#fff" opacity="0.95"/>
+        </g></g>
+        <circle cx="60" cy="60" r="44" fill="url(#innerShadow)" pointer-events="none"/>
+        <ellipse cx="48" cy="40" rx="24" ry="12" fill="#ffffff" opacity="0.12" clip-path="url(#lc)" pointer-events="none"/>
+      </svg>
+      <script is:inline>
+        (() => {
+          const e = document.querySelector('.lid-eye');
+          if (!e) return;
+          const b = e.querySelector('.eyeball');
+          let mx = null, my = null, cx = 0, cy = 0;
+          const MAX = 14, MAXY = 12, NEAR = 620;
+          addEventListener('mousemove', (v) => { mx = v.clientX; my = v.clientY; }, { passive: true });
+          (function f() {
+            let tx = 0, ty = 0;
+            const r = e.getBoundingClientRect();
+            if (mx != null && r.width) {
+              const ex = r.left + r.width / 2, ey = r.top + r.height / 2,
+                dx = mx - ex, dy = my - ey, d = Math.hypot(dx, dy) || 1;
+              if (d < NEAR) {
+                tx = Math.max(-MAX, Math.min(MAX, dx / d * MAX));
+                ty = Math.max(-MAXY, Math.min(MAXY, dy / d * MAXY));
+              }
+            }
+            cx += (tx - cx) * 0.14; cy += (ty - cy) * 0.14;
+            b.setAttribute('transform', 'translate(' + cx.toFixed(2) + ' ' + cy.toFixed(2) + ')');
+            requestAnimationFrame(f);
+          })();
+        })();
+      </script>
+
+      <h1 class="wordmark text-5xl md:text-6xl leading-[1.04] mt-5 uppercase">Lidless</h1>
+      <p class="font-mono text-base md:text-lg mt-3 motto" style="color: var(--accent); letter-spacing: 0.04em;">
+        {SITE.motto}
+      </p>
+      <p class="text-lg mt-5 max-w-xl mx-auto" style="color: var(--text-muted);">
+        Open-source tooling that keeps watch over your stack - the SOC, the network, and the
+        homelab - all speaking one interface to your AI client.
+      </p>
+
+      <div class="flex flex-wrap gap-3 mt-7 items-center justify-center">
+        <a href="#tools" class="btn-primary">Browse the tools &darr;</a>
+        <a href={EXTERNAL.github} class="btn-ghost">View on GitHub &rarr;</a>
+      </div>
+
+      <div class="spec-strip mt-10 w-full max-w-xl text-left">
+        <div class="spec"><div class="n">{total}</div><div class="l">tools</div></div>
+        <div class="spec"><div class="n">{categories}</div><div class="l">domains</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">licensed</div></div>
+        <div class="spec"><div class="n">local</div><div class="l">first</div></div>
+      </div>
+    </header>
+
+    <!-- ============================ TOOLS ============================ -->
+    <section id="tools" class="px-6 md:px-10 py-12 max-w-6xl mx-auto">
+      <div class="section-rule"><h2 class="kicker m-0">THE WATCH FLOOR</h2></div>
+      <p class="max-w-2xl mt-7 mb-9" style="color: var(--text-muted);">
+        Every tool is open source and built to the same shape: wire a real security, network, or
+        homelab system into an AI client and read it like a console. Three watch surfaces, read
+        side by side.
+      </p>
+
+      <div class="columns">
+        {CATEGORY_ORDER.map((cat) => {
+          const inCat = TOOLS.filter((t) => t.category === cat);
+          return (
+            <div class="col" id={CAT_ANCHOR[cat]}>
+              <div class="col-head">
+                <span class="num">{CAT_NUM[cat]}</span>
+                <h2>{cat}</h2>
+                <span class="count">{inCat.length}</span>
+              </div>
+              <div class="col-rule"></div>
+              <div class="watch-list">
+                {inCat.map((t) => (
+                  <a class="tool" href={`/${t.slug}`}>
+                    <div class="tool-top">
+                      <span class="tool-name">{t.name}</span>
+                      <span class={lifeClass(t.lifecycle)}><span class="dot"></span>{t.lifecycle}</span>
+                    </div>
+                    <div class="tool-desc">{t.oneLiner}</div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- ============================ WHAT THIS IS ============================ -->
+    <section id="about" class="px-6 md:px-10 py-12 max-w-6xl mx-auto">
+      <div class="section-rule"><h2 class="kicker m-0">WHAT THIS IS</h2></div>
+      <div class="what mt-7">
+        <p>
+          Lidless is lab-grade, open-source tooling that comes out of running the real thing: a
+          SIEM queried under pressure, network monitoring that has to be trusted, a hypervisor
+          that has to stay up. Each tool is honest about its maturity and built to be read.
+        </p>
+        <p>
+          Everything is MIT licensed and local-first. The eye does not close.
+          <span class="em">Constant Vigilance.</span>
+        </p>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

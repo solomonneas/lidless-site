@@ -1,0 +1,348 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   Lidless: the dark-watch identity (v3, blue + white).
+   Cold near-black ground, electric-blue accent, white type. Dark only -
+   the unsleeping eye does not switch to a day mode.
+
+   Fonts (Instrument Sans + IBM Plex Mono) are loaded via a Google Fonts
+   <link> in BaseLayout.astro.
+   =========================================================================== */
+:root {
+  color-scheme: dark;
+  --bg: #0a0e15;
+  --bg-panel: #0d1119;
+  --bg-panel-2: #111824;
+  --white: #f4f7fa;
+  --text: #cdd6df;
+  --text-muted: #818c9b;
+  --text-dim: #5a6573;
+  --accent: #38bdf8;
+  --accent-dim: #1f7fb0;
+  --accent-glow: color-mix(in srgb, var(--accent) 22%, transparent);
+  --hairline: #1a2230;
+  --hairline-strong: #232c3a;
+  --term-bg: #0d1119;
+  --on-accent: #061320;
+  --danger: #ef4444;
+  --warn: #d8a657;
+  --wip: #d8a657;
+}
+
+html { background: var(--bg); color: var(--text); }
+body {
+  font-family: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+}
+
+.font-display {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.font-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.kicker {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+a { color: inherit; }
+
+/* Section heading rule: accent dash + label + thin rule */
+.section-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.section-rule::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.section-rule::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Wordmark - white offset, no glow */
+.wordmark {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--white);
+}
+
+/* ---------------------------------------------------------------- hero motif */
+.lid-eye { display: block; }
+
+/* ---------------------------------------------------------------- CTA depth */
+.btn-primary {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.62rem 1.2rem;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #5cc7fb 0%, #38bdf8 55%, #1ea8e6 100%);
+  color: #04121f;
+  border: 1px solid #7ad2fb;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.38) inset,
+    0 8px 22px -8px rgba(56, 189, 248, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 14px 32px -8px rgba(56, 189, 248, 0.7),
+    0 3px 6px rgba(0, 0, 0, 0.45);
+}
+.btn-ghost {
+  font-size: 0.9rem;
+  padding: 0.62rem 1.2rem;
+  border-radius: 7px;
+  border: 1px solid var(--hairline-strong);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01));
+  color: var(--text);
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.1), rgba(56, 189, 248, 0.03));
+  box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------------------------------------------------------------- catalog: three parallel watch-lists */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+@media (max-width: 900px) {
+  .columns { grid-template-columns: 1fr; gap: 2.75rem; }
+}
+
+.col { scroll-margin-top: 2rem; }
+.col-head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1.25rem; }
+.col-head .num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.col-head h2 {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+.col-head .count {
+  margin-left: auto;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+.col-rule { border-top: 1px solid var(--hairline); margin-bottom: 0.5rem; }
+
+.watch-list { display: flex; flex-direction: column; }
+.tool {
+  display: block;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--hairline);
+  transition: padding-left 0.15s ease;
+}
+.tool:last-child { border-bottom: 0; }
+.tool:hover { padding-left: 0.35rem; }
+.tool-top { display: flex; align-items: center; gap: 0.6rem; }
+.tool-name {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 0.92rem;
+  color: var(--white);
+  letter-spacing: -0.01em;
+}
+.tool:hover .tool-name { color: var(--accent); }
+.tool-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* lifecycle mark: a small dot + label, no badge chrome */
+.life {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.life .dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+.life-active { color: var(--accent); }
+.life-active .dot { background: var(--accent); }
+.life-wip { color: var(--wip); }
+.life-wip .dot { background: var(--wip); }
+.life-exp { color: var(--text-dim); }
+.life-exp .dot { background: transparent; border: 1px solid var(--text-dim); }
+
+/* "what this is" block */
+.what { max-width: 42rem; }
+.what p { color: var(--text-muted); margin: 0 0 1rem; }
+.what .em { color: var(--accent); }
+
+/* ---------------------------------------------------------------- lifecycle badge (tool pages) */
+.badge {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.badge::before { content: "● "; }
+.badge-active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+.badge-wip {
+  color: var(--wip);
+  border-color: color-mix(in srgb, var(--wip) 35%, transparent);
+  background: color-mix(in srgb, var(--wip) 9%, transparent);
+}
+.badge-experimental {
+  color: var(--text-muted);
+  border-color: var(--hairline-strong);
+  background: color-mix(in srgb, var(--text-muted) 7%, transparent);
+}
+
+/* tool page: prominent GitHub / npm CTAs at the top of the hero */
+.tool-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 1.25rem; }
+.cta-note {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.78rem; color: var(--text-dim); letter-spacing: 0.04em; align-self: center;
+}
+
+/* tool page: clean capability list (name | description rows), replaces the bare wall */
+.cap-list { border-top: 1px solid var(--hairline); margin-top: 0.25rem; }
+.cap {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr;
+  gap: 1.25rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--hairline);
+  align-items: baseline;
+}
+.cap-name { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.9rem; color: var(--white); }
+.cap-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; }
+.cap-group-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin: 1.5rem 0 0.25rem;
+}
+@media (max-width: 640px) { .cap { grid-template-columns: 1fr; gap: 0.2rem; } }
+
+/* Stat / spec strip */
+.spec-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.spec-strip .spec {
+  background: var(--bg-panel);
+  padding: 1rem 1.1rem;
+}
+.spec-strip .spec .n {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+.spec-strip .spec .l {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* Terminal block (tool pages) */
+.term {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  background: var(--term-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  color: var(--text-muted);
+  overflow-x: auto;
+}
+.term .prompt { color: var(--accent); }
+
+/* copy button on code / terminal / config blocks (wrapper added by JS) */
+.term-wrap { position: relative; }
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-panel-2);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.term-wrap:hover .copy-btn,
+.copy-btn:focus-visible { opacity: 1; }
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+.copy-btn.copied { color: var(--accent); border-color: var(--accent); opacity: 1; }
+@media (hover: none) { .copy-btn { opacity: 1; } }
+
+/* nav GitHub button */
+.gh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--hairline);
+  background: var(--bg-panel);
+  font-size: 0.85rem;
+}
+.gh-btn:hover { border-color: var(--hairline-strong); }
+
+/* a11y: accent-colored inline links underlined so they are not color-alone */
+a[style*="color: var(--accent)"]:not(.wordmark):not(.motto) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

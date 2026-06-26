@@ -1,0 +1,189 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS, type Lifecycle } from '../lib/tools.ts';
+import {
+  composeTitle,
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+// Look up this tool by slug. Note: slug is cortex-mcp, npm package is thehive-cortex-mcp.
+const tool = TOOLS.find((t) => t.slug === 'cortex-mcp')!;
+const { name, oneLiner, lifecycle, repo, npm } = tool;
+
+const SITE_URL = 'https://lidless.dev';
+const pageUrl = `${SITE_URL}/cortex-mcp`;
+
+const title = composeTitle('Cortex MCP server', 'observable analysis for AI agents');
+const description =
+  'cortex-mcp is an open-source MCP server for Cortex by StrangeBee: 31 tools to run analyzers and responders, enrich observables, and manage jobs from your AI client.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name,
+    siteUrl: pageUrl,
+    description,
+    image: absoluteImage(SITE_URL, '/og-card.png'),
+    codeRepository: repo,
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass = (l: Lifecycle) =>
+  l === 'Active'
+    ? 'badge badge-active'
+    : l === 'WIP'
+    ? 'badge badge-wip'
+    : 'badge badge-experimental';
+
+// Tools exposed, grouped from the README's surface (31 total).
+const toolGroups: { group: string; tools: string[] }[] = [
+  {
+    group: 'Analyzers (5)',
+    tools: [
+      'list / get enabled analyzers',
+      'run analyzer by ID or by name',
+      'run analyzer on a file (path-confined or base64)',
+    ],
+  },
+  {
+    group: 'Analyzer definitions (3)',
+    tools: ['browse 260+ definitions with filters', 'enable / disable an analyzer (gated)'],
+  },
+  {
+    group: 'Jobs (7)',
+    tools: [
+      'get job, get report, wait-and-get',
+      'list jobs, get artifacts (IOCs)',
+      'delete job (gated), bulk cleanup with dry-run',
+    ],
+  },
+  {
+    group: 'Responders (5)',
+    tools: [
+      'list responders + browse 137+ definitions',
+      'enable / disable responders',
+      'run a responder (gated, requires confirm)',
+    ],
+  },
+  {
+    group: 'Bulk + status',
+    tools: [
+      'analyze an observable with auto data-type detection',
+      'taxonomy aggregation, capped fan-out',
+      'instance health, version, config',
+    ],
+  },
+  {
+    group: 'Orgs + users (superadmin)',
+    tools: [
+      'list / get / create / update organizations',
+      'list / get / create users',
+      'renew + retrieve user API keys',
+    ],
+  },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- breadcrumb / back to hub -->
+    <p class="kicker mb-6">
+      <a href="/" style="color: var(--text-dim); text-decoration: none;">&larr; Lidless</a>
+      &nbsp;/&nbsp; SECURITY / SOC &nbsp;/&nbsp; {name}
+    </p>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap mb-3">
+        <h1 class="wordmark font-display text-4xl md:text-5xl uppercase m-0">{name}</h1>
+        <span class={badgeClass(lifecycle)}>{lifecycle}</span>
+      </div>
+      <p class="text-lg max-w-2xl" style="color: var(--text-muted);">{oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={tool.repo} rel="noopener">GitHub repo &rarr;</a>
+        {tool.npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${tool.npm}`} rel="noopener">npm: {tool.npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <div class="max-w-2xl" style="color: var(--text-muted);">
+        <p class="mb-4">
+          cortex-mcp is a Model Context Protocol server for
+          <a href="https://docs.strangebee.com/cortex/" rel="noopener" style="color: var(--accent);">Cortex</a>
+          by StrangeBee / TheHive Project. Cortex automates observable analysis (IPs, URLs, hashes,
+          domains, emails, files) through analyzers and executes response actions through responders.
+        </p>
+        <p class="mb-4">
+          This server exposes 31 tools covering the complete Cortex API surface, plus resources and
+          guided prompts for setup, investigation, and triage. It auto-detects observable data types,
+          can fan out across all applicable analyzers with taxonomy aggregation, and supports both
+          org-level and superadmin keys for administration.
+        </p>
+        <p>
+          Real-world actions are secured by default: arbitrary file reads are blocked, responders and
+          deletes require an explicit environment flag plus per-call confirmation, and bulk analysis
+          is conservative unless you opt into fan-out.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">INSTALL</h2></div>
+      <div class="term" aria-label="Install command">
+        <div><span class="prompt">$</span> npm install -g thehive-cortex-mcp <span style="color: var(--text-dim);"># install the binary</span></div>
+        <div><span class="prompt">$</span> npx thehive-cortex-mcp <span style="color: var(--text-dim);"># or run it directly</span></div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Published on npm as <span class="font-mono">thehive-cortex-mcp</span>; the binary is
+        <span class="font-mono">cortex-mcp</span>. Requires Node.js 20+ and a running Cortex
+        instance (v3.x recommended). Set <span class="font-mono">CORTEX_URL</span> and
+        <span class="font-mono">CORTEX_API_KEY</span>; add
+        <span class="font-mono">CORTEX_SUPERADMIN_KEY</span> for org/user management.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">TOOLS EXPOSED</h2></div>
+      {toolGroups.map((g) => (
+        <>
+          <p class="cap-group-label">{g.group}</p>
+          <div class="cap-list">
+            {g.tools.map((t) => (
+              <div class="cap"><div class="cap-desc" style="grid-column: 1 / -1;">{t}</div></div>
+            ))}
+          </div>
+        </>
+      ))}
+    </section>
+
+    <!-- ============================ CLIENT CONFIG ============================ -->
+    <section class="mb-12">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">CLIENT CONFIG</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A sample <span class="font-mono">mcpServers</span> entry for an MCP client such as Claude
+        Desktop. The server speaks MCP over stdio.
+      </p>
+      <pre class="term" aria-label="MCP client configuration"><code>{`{
+  "mcpServers": {
+    "cortex": {
+      "command": "cortex-mcp",
+      "env": {
+        "CORTEX_URL": "http://cortex.example.com:9001",
+        "CORTEX_API_KEY": "your-org-admin-key",
+        "CORTEX_SUPERADMIN_KEY": "your-superadmin-key"
+      }
+    }
+  }
+}`}</code></pre>
+    </section>
+  </main>
+</BaseLayout>

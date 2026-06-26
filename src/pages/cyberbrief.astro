@@ -1,0 +1,138 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'cyberbrief')!;
+
+const title = 'CyberBRIEF - AI cyber threat-intel research and reporting';
+const description =
+  'CyberBRIEF is an open-source web app that turns raw threat data into BLUF executive reports with MITRE ATT&CK mapping, IOC extraction, and academic citations, across three research tiers.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name: tool.name,
+    siteUrl: 'https://lidless.dev/cyberbrief',
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: tool.repo,
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass =
+  tool.lifecycle === 'Active'
+    ? 'badge badge-active'
+    : tool.lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+const capabilities = [
+  ['Three research tiers', 'Free (Brave + Gemini Flash), Standard (Perplexity Sonar), and Deep (Perplexity Deep Research).'],
+  ['Flexible source input', 'Feed URLs, raw text, or PDFs directly into synthesis.'],
+  ['BLUF summaries', 'Bottom-Line-Up-Front executive summaries that lead with the conclusion.'],
+  ['MITRE ATT&CK mapping', 'Automatic technique identification with Navigator layer export.'],
+  ['IOC extraction', 'IPs, domains, file hashes, CVEs, and URLs parsed automatically.'],
+  ['Academic citations', 'Chicago Notes-Bibliography format on every source.'],
+  ['Threat-actor profiling', 'Rich actor profiles with confidence assessments.'],
+  ['Export options', 'Markdown and HTML report export.'],
+  ['TLP banners', 'Traffic Light Protocol classification on every report.'],
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- back-link / breadcrumb -->
+    <nav class="kicker mb-8" aria-label="Breadcrumb">
+      <a href="/" style="text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / {tool.category} / {tool.name}</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark font-display text-4xl md:text-5xl uppercase m-0">{tool.name}</h1>
+        <span class={badgeClass}>{tool.lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{tool.oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={tool.repo} rel="noopener">GitHub repo &rarr;</a>
+        {tool.npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${tool.npm}`} rel="noopener">npm: {tool.npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+      <div class="spec-strip mt-7 max-w-2xl text-left">
+        <div class="spec"><div class="n">app</div><div class="l">web app, not an MCP server</div></div>
+        <div class="spec"><div class="n">3</div><div class="l">research tiers</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">open source</div></div>
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <p class="max-w-2xl" style="color: var(--text-muted);">
+        CyberBRIEF transforms raw threat data into executive-grade
+        <span class="font-mono" style="color: var(--accent);">BLUF</span> (Bottom-Line-Up-Front)
+        reports with MITRE ATT&amp;CK mapping, IOC extraction, and academic citations. Three
+        research tiers span free open-source intelligence to deep AI-powered research, so an
+        analyst can do a quick lookup or a comprehensive multi-source workup from the same tool.
+        The frontend is React 18 + TypeScript + Vite with Zustand state; the backend is a FastAPI
+        service on Python 3.10+ with SQLite for report persistence.
+      </p>
+      <p class="max-w-2xl mt-4 text-sm" style="color: var(--text-muted);">
+        Status: experimental. CyberBRIEF is a self-hosted web app, not an MCP server, so there is
+        no AI-client config block. It is not published to a package registry; you clone and run it
+        from source, and AI / search features need their own API keys.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT PRODUCES</h2></div>
+      <div class="cap-list">
+        {capabilities.map(([name, desc]) => (
+          <div class="cap">
+            <div class="cap-name">{name}</div>
+            <div class="cap-desc">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL / RUN ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">RUNNING IT</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Prerequisites: Python 3.10+ for the FastAPI backend and Node.js with npm for the React
+        frontend. Clone the repo, install both halves, then run the dev servers.
+      </p>
+      <div class="term" aria-label="Clone and install CyberBRIEF">
+        <div><span class="prompt">$</span> git clone https://github.com/solomonneas/cyberbrief.git</div>
+        <div><span class="prompt">$</span> cd cyberbrief</div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># backend</span></div>
+        <div><span class="prompt">$</span> pip install -r backend/requirements.txt</div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># frontend</span></div>
+        <div><span class="prompt">$</span> cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</div>
+      </div>
+      <p class="max-w-2xl mt-5 mb-4" style="color: var(--text-muted);">
+        The Vite dev server proxies API calls to the backend. Frontend on
+        <span class="font-mono" style="color: var(--accent);">http://localhost:5188</span>,
+        backend on <span class="font-mono" style="color: var(--accent);">http://localhost:8000</span>.
+      </p>
+      <p class="text-sm mt-4" style="color: var(--text-dim);">
+        Configure API keys (Brave Search, Gemini, Perplexity) and ports per
+        <span class="font-mono">docs/CONFIGURATION.md</span>. Deployment configs ship for Railway
+        (<span class="font-mono">railway.json</span>), Fly.io (<span class="font-mono">fly.toml</span>),
+        and Docker (<span class="font-mono">Dockerfile</span>).
+      </p>
+    </section>
+  </main>
+</BaseLayout>

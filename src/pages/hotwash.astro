@@ -1,0 +1,162 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'hotwash')!;
+
+const title = 'Hotwash IR runbook builder';
+const description =
+  'Hotwash turns Markdown and Mermaid incident-response playbooks into interactive flowcharts with a step-by-step execution engine, AI playbook generation, and Wazuh alert ingestion.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name: tool.name,
+    siteUrl: 'https://lidless.dev/hotwash',
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: tool.repo,
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass =
+  tool.lifecycle === 'Active'
+    ? 'badge badge-active'
+    : tool.lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+const capabilities: [string, string][] = [
+  ['Markdown to flowchart', 'Parse structured Markdown playbooks into node-edge graphs, no diagram tool required.'],
+  ['Mermaid syntax', 'Native support for Mermaid flowchart syntax alongside the Markdown format.'],
+  ['Interactive canvas', 'Drag, pan, and zoom over the playbook graph with React Flow, plus minimap and viewport controls.'],
+  ['Custom node types', 'Phase, Step, Decision, Execute, and Merge nodes model real IR procedures.'],
+  ['Execution engine', 'Run playbooks step-by-step with live status tracking, timestamps, and run history.'],
+  ['AI playbook generation', 'Generate a complete playbook from a natural-language incident description.'],
+  ['SOAR action library', 'Built-in templates: isolate_host, disable_account, block_ioc, snapshot_vm, quarantine_email, and recon actions.'],
+  ['Wazuh ingestion', 'Accept Wazuh alerts over an HMAC-authenticated webhook and auto-start, queue, or log a run via mapping rules.'],
+  ['Playbook library', 'Browse, categorize, and filter playbooks by type: vulnerability, incident response, threat hunting.'],
+  ['5 visual themes', 'SOC, Analyst, Terminal, Command, and Cyber variants share one parsing engine and canvas.'],
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- back-link / breadcrumb -->
+    <nav class="kicker mb-8" aria-label="Breadcrumb">
+      <a href="/" style="text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / SECURITY / SOC / HOTWASH</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark font-display text-4xl md:text-5xl uppercase m-0">{tool.name}</h1>
+        <span class={badgeClass}>{tool.lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{tool.oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={tool.repo} rel="noopener">GitHub repo &rarr;</a>
+        {tool.npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${tool.npm}`} rel="noopener">npm: {tool.npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+      <div class="spec-strip mt-7 max-w-2xl text-left">
+        <div class="spec"><div class="n">5</div><div class="l">node types</div></div>
+        <div class="spec"><div class="n">5</div><div class="l">visual themes</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">open source</div></div>
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <p class="max-w-2xl" style="color: var(--text-muted);">
+        Hotwash turns incident-response playbooks written in Markdown or Mermaid into interactive
+        flowchart visualizations with a full execution engine. A SOC analyst can build a runbook,
+        execute it step-by-step, and track every run with timestamps and history. AI generation
+        drafts a complete playbook from a plain-English incident description, and a built-in SOAR
+        action library maps steps onto real response actions like isolating a host or blocking an
+        IOC. A Wazuh ingestion path can turn an incoming alert into an auto-started run or a
+        human-review suggestion.
+      </p>
+      <p class="max-w-2xl mt-4" style="color: var(--text-muted);">
+        The frontend is React 18 + TypeScript on Vite; an optional FastAPI backend on Python 3.9+
+        adds playbook storage, the execution engine, and integrations. Visualization works
+        offline-first with no backend required.
+      </p>
+      <p class="max-w-2xl mt-4 text-sm" style="color: var(--warn);">
+        Status: work in progress. Hotwash is a self-hosted application, not an MCP server, so there
+        is no AI-client config block on this page. The web app itself is not published to a
+        registry, you run it from source. A companion <span class="font-mono">hotwash-mcp</span>
+        package is published separately (see below) for agents that want to drive runs.
+      </p>
+    </section>
+
+    <!-- ============================ CAPABILITIES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES, IN DETAIL</h2></div>
+      <div class="cap-list">
+        {capabilities.map(([name, desc]) => (
+          <div class="cap">
+            <div class="cap-name">{name}</div>
+            <div class="cap-desc">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL / RUN ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">RUNNING IT</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Prerequisites: Node.js 20+ for the frontend, and Python 3.9+ if you want the optional
+        backend. Clone the repo, install, and start the dev server. The backend is only needed for
+        playbook storage, the execution engine, and integrations.
+      </p>
+      <div class="term" aria-label="Clone and run Hotwash">
+        <div><span class="prompt">$</span> git clone https://github.com/solomonneas/hotwash.git</div>
+        <div><span class="prompt">$</span> cd hotwash</div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># frontend (dev server on http://localhost:5177)</span></div>
+        <div><span class="prompt">$</span> cd web && npm install && npm run dev</div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># backend (optional, from the repo root)</span></div>
+        <div><span class="prompt">$</span> python3 -m venv .venv && .venv/bin/pip install -r requirements.txt</div>
+        <div><span class="prompt">$</span> .venv/bin/uvicorn api.main:app --port 8000</div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Frontend at <span class="font-mono">http://localhost:5177</span>, optional backend at
+        <span class="font-mono">http://localhost:8000</span>. The Wazuh ingest webhook posts to
+        <span class="font-mono">/api/ingest/wazuh</span> with HMAC auth; see
+        <span class="font-mono">docs/WAZUH-INGEST.md</span> in the repo for the integration script
+        and mapping rules.
+      </p>
+    </section>
+
+    <!-- ============================ COMPANION MCP ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">COMPANION MCP SERVER</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        A separate <span class="font-mono">hotwash-mcp</span> package lets AI agents drive playbook
+        runs over the Model Context Protocol: list and read playbooks, start and query runs, manage
+        the human-review suggestion queue, and attach artifacts. It is published to npm and points
+        at a running Hotwash backend.
+      </p>
+      <div class="term" aria-label="Install hotwash-mcp from npm">
+        <div><span class="prompt">$</span> npm i -g hotwash-mcp        <span style="color: var(--text-dim);"># or: npx hotwash-mcp</span></div>
+      </div>
+      <p class="text-sm mt-4 max-w-2xl" style="color: var(--text-dim);">
+        Tool groups: playbooks, runs, suggestions, and artifacts. See the
+        <span class="font-mono">mcp/</span> directory in the repo for the full reference and client
+        config.
+      </p>
+    </section>
+  </main>
+</BaseLayout>

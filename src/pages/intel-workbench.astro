@@ -1,0 +1,170 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TOOLS } from '../lib/tools.ts';
+import {
+  softwareApplicationLd,
+  organizationLd,
+  absoluteImage,
+  graph,
+} from '../lib/seo.ts';
+
+const tool = TOOLS.find((t) => t.slug === 'intel-workbench')!;
+
+const title = 'Intel Workbench - Structured Analytic Techniques for CTI';
+const description =
+  'Intel Workbench is an open-source, offline-first web app with a library of Structured Analytic Techniques (ACH, Key Assumptions Check, Devil\'s Advocacy, and more) for cyber threat intelligence.';
+
+const jsonLd = graph([
+  organizationLd(),
+  softwareApplicationLd({
+    name: tool.name,
+    siteUrl: 'https://lidless.dev/intel-workbench',
+    description,
+    image: absoluteImage('https://lidless.dev', '/og-card.png'),
+    codeRepository: tool.repo,
+    license: 'https://opensource.org/licenses/MIT',
+  }),
+]);
+
+const badgeClass =
+  tool.lifecycle === 'Active'
+    ? 'badge badge-active'
+    : tool.lifecycle === 'WIP'
+      ? 'badge badge-wip'
+      : 'badge badge-experimental';
+
+// SAT library, with delivery status straight from the README table.
+const sats = [
+  ['Analysis of Competing Hypotheses (ACH)', 'Contrarian', 'Shipped'],
+  ['Key Assumptions Check', 'Diagnostic', 'Phase 1'],
+  ['Quality of Information Check', 'Diagnostic', 'Phase 1'],
+  ['Indicators / Signposts of Change', 'Forward-looking', 'Phase 2'],
+  ["Devil's Advocacy", 'Contrarian', 'Phase 3'],
+  ['Premortem Analysis', 'Contrarian', 'Phase 3'],
+  ['Red Team Analysis', 'Imagination', 'Phase 4'],
+];
+
+const features = [
+  ['ACH matrix', 'Interactive evidence-vs-hypothesis grid with C/I/N/NA ratings, weighted scoring, and automatic preferred-hypothesis identification.'],
+  ['MITRE ATT&CK tagging', 'Tag evidence and hypotheses against the Enterprise matrix (691 techniques, 14 tactics), vendored locally for offline use.'],
+  ['Cognitive bias checklist', 'Heuer & Pherson taxonomy: 12 biases across Cognitive, Analytical, and Social categories with per-bias mitigation notes.'],
+  ['ICD 203 estimative language', 'Pick a likelihood band ("almost no chance" to "almost certainly") with the canonical ODNI probability ranges.'],
+  ['Evidence weighting', 'Credibility and relevance ratings (High/Medium/Low) feed the weighted inconsistency scores.'],
+  ['Export & import', 'Full JSON export/import for backup and sharing; Markdown export with ATT&CK technique IDs.'],
+  ['5 visual themes', 'Langley, Terminal, Analyst\'s Desk, Stratcom, and Cyber Noir layouts over the same store.'],
+  ['Offline-first', 'All data persists in localStorage; works with no server and no backend.'],
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-12 max-w-4xl mx-auto">
+    <!-- back-link / breadcrumb -->
+    <nav class="kicker mb-8" aria-label="Breadcrumb">
+      <a href="/" style="text-decoration: none;">&larr; Lidless</a>
+      <span style="color: var(--text-dim);"> / {tool.category} / {tool.name}</span>
+    </nav>
+
+    <!-- ============================ HERO ============================ -->
+    <header class="mb-10">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="wordmark font-display text-4xl md:text-5xl uppercase m-0">{tool.name}</h1>
+        <span class={badgeClass}>{tool.lifecycle}</span>
+      </div>
+      <p class="text-lg mt-4 max-w-2xl" style="color: var(--text-muted);">{tool.oneLiner}</p>
+      <div class="tool-cta">
+        <a class="btn-primary" href={tool.repo} rel="noopener">GitHub repo &rarr;</a>
+        {tool.npm
+          ? <a class="btn-ghost" href={`https://www.npmjs.com/package/${tool.npm}`} rel="noopener">npm: {tool.npm} &rarr;</a>
+          : <span class="cta-note">self-hosted &middot; run from source</span>}
+      </div>
+      <div class="spec-strip mt-7 max-w-2xl text-left">
+        <div class="spec"><div class="n">SPA</div><div class="l">browser app, not an MCP server</div></div>
+        <div class="spec"><div class="n">7</div><div class="l">analytic techniques</div></div>
+        <div class="spec"><div class="n">MIT</div><div class="l">open source</div></div>
+      </div>
+    </header>
+
+    <!-- ============================ WHAT IT DOES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT DOES</h2></div>
+      <p class="max-w-2xl" style="color: var(--text-muted);">
+        Intel Workbench is a library of Structured Analytic Techniques (SATs) for cyber threat
+        intelligence: ACH, Key Assumptions Check, Quality of Information Check, Indicators of
+        Change, Devil's Advocacy, Premortem, and Red Team, all sharing one evidence/hypothesis
+        substrate. It is anchored in CIA's <em>A Tradecraft Primer for Intelligence Analysis</em>
+        (Sherman Kent School, 2009) and Heuer &amp; Pherson's <em>Structured Analytic Techniques
+        for Intelligence Analysis</em>, 3rd ed. Every technique surfaces its citation in-app via a
+        shared methodology panel, and ICD 203 estimative-language bands sit on top of every SAT as
+        the universal write-up overlay.
+      </p>
+      <p class="max-w-2xl mt-4" style="color: var(--text-muted);">
+        It is a single-page React 18 + TypeScript application with no backend: Zustand state
+        persists to <code>localStorage</code>, so an analyst can pivot from Key Assumptions Check
+        into ACH into Devil's Advocacy without leaving the workspace or copying data between tools.
+      </p>
+      <p class="max-w-2xl mt-4 text-sm" style="color: var(--wip);">
+        Status: work in progress. ACH is shipped; the remaining six techniques land across a
+        four-phase roadmap (see ROADMAP.md). It is an offline-first browser app, not an MCP
+        server, so there is no AI-client config block, and it is not published to a package
+        registry; you run it from source.
+      </p>
+    </section>
+
+    <!-- ============================ SAT LIBRARY ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">SAT LIBRARY</h2></div>
+      <p class="max-w-2xl mb-5" style="color: var(--text-muted);">
+        Seven techniques grouped by tier per the <em>Tradecraft Primer</em>. Each is grounded in a
+        citable source and shares the common evidence/hypothesis matrix.
+      </p>
+      <div class="term" aria-label="Structured Analytic Techniques and delivery status">
+        {sats.map(([name, tier, status]) => (
+          <div>
+            <span class="prompt">&gt;</span> {name}
+            <span style="color: var(--text-dim);"> &middot; {tier} &middot; {status}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ============================ FEATURES ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">WHAT IT GIVES THE ANALYST</h2></div>
+      <div class="cap-list">
+        {features.map(([name, desc]) => (
+          <div class="cap">
+            <div class="cap-name">{name}</div>
+            <div class="cap-desc">{desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ============================ INSTALL / RUN ============================ -->
+    <section class="mb-10">
+      <div class="section-rule mb-5"><h2 class="kicker m-0">RUNNING IT</h2></div>
+      <p class="max-w-2xl mb-4" style="color: var(--text-muted);">
+        Prerequisites: Node.js 18+ and npm 9+. Clone the repo, install, and start the Vite dev
+        server. There is no backend to stand up.
+      </p>
+      <div class="term" aria-label="Clone and run Intel Workbench">
+        <div><span class="prompt">$</span> git clone https://github.com/solomonneas/intel-workbench.git</div>
+        <div><span class="prompt">$</span> cd intel-workbench</div>
+        <div><span class="prompt">$</span> npm install</div>
+        <div><span class="prompt">$</span> npm run dev</div>
+        <div>&nbsp;</div>
+        <div><span style="color: var(--text-dim);"># production build</span></div>
+        <div><span class="prompt">$</span> npm run build &amp;&amp; npm run preview</div>
+      </div>
+      <p class="max-w-2xl mt-5" style="color: var(--text-muted);">
+        Open <span class="font-mono" style="color: var(--accent);">http://localhost:5173</span>.
+        A hosted build is also live at
+        <a href="https://intel-workbench.vercel.app" rel="noopener" style="color: var(--accent);">intel-workbench.vercel.app</a>.
+      </p>
+      <p class="text-sm mt-4" style="color: var(--text-dim);">
+        The ATT&amp;CK Enterprise dataset is vendored at
+        <span class="font-mono">src/data/attack-enterprise.json</span> and lazy-loaded; refresh it
+        after a new ATT&amp;CK release with the <span class="font-mono">slim-attack.jq</span> script.
+      </p>
+    </section>
+  </main>
+</BaseLayout>

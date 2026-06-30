@@ -140,22 +140,22 @@ export const TOOLS: Tool[] = [
 
   // ---- NETWORK ----
   {
-    name: 'librenmsctl',
+    name: 'librenmsctrl',
     slug: 'librenms-mcp',
     oneLiner: 'CLI and MCP-compatible control surface for LibreNMS network monitoring.',
     lifecycle: 'WIP',
     category: 'Network',
-    repo: `${GH}/librenmsctl`,
+    repo: `${GH}/librenmsctrl`,
     npm: '@solomonneas/librenms-mcp',
   },
   {
-    name: 'n8nctl',
+    name: 'n8nctrl',
     slug: 'n8n-ops-mcp',
     oneLiner:
       'Ops-focused n8n control surface - list, trigger, validate, and audit workflows.',
     lifecycle: 'Active',
     category: 'Network',
-    repo: `${GH}/n8nctl`,
+    repo: `${GH}/n8nctrl`,
     npm: 'n8n-ops-mcp',
   },
   {
@@ -189,12 +189,12 @@ export const TOOLS: Tool[] = [
     npm: '@solomonneas/proxmox-mcp',
   },
   {
-    name: 'adguardctl',
+    name: 'adguardctrl',
     slug: 'adguard-mcp',
     oneLiner: 'CLI and MCP-compatible control surface for AdGuard Home DNS filtering.',
     lifecycle: 'WIP',
     category: 'Homelab',
-    repo: `${GH}/adguardctl`,
+    repo: `${GH}/adguardctrl`,
     npm: '@solomonneas/adguard-mcp',
   },
   {
@@ -217,21 +217,21 @@ export const TOOLS: Tool[] = [
     npm: null,
   },
   {
-    name: 'jellyctl',
+    name: 'jellyctrl',
     slug: 'jellyfin-mcp',
     oneLiner: 'Jellyfin media server control from CLI and MCP-compatible clients.',
     lifecycle: 'WIP',
     category: 'Homelab',
-    repo: `${GH}/jellyctl`,
+    repo: `${GH}/jellyctrl`,
     npm: 'jellyfin-mcp',
   },
   {
-    name: 'immichctl',
+    name: 'immichctrl',
     slug: 'immich-mcp',
     oneLiner: 'Immich photo library control from CLI and MCP-compatible clients.',
     lifecycle: 'Active',
     category: 'Homelab',
-    repo: `${GH}/immichctl`,
+    repo: `${GH}/immichctrl`,
     npm: 'immich-mcp',
   },
 ];

@@ -140,22 +140,22 @@ export const TOOLS: Tool[] = [
 
   // ---- NETWORK ----
   {
-    name: 'librenms-mcp',
+    name: 'librenmsctl',
     slug: 'librenms-mcp',
-    oneLiner: 'MCP server for LibreNMS network monitoring.',
+    oneLiner: 'CLI and MCP-compatible control surface for LibreNMS network monitoring.',
     lifecycle: 'WIP',
     category: 'Network',
-    repo: `${GH}/librenms-mcp`,
+    repo: `${GH}/librenmsctl`,
     npm: '@solomonneas/librenms-mcp',
   },
   {
-    name: 'n8n-ops-mcp',
+    name: 'n8nctl',
     slug: 'n8n-ops-mcp',
     oneLiner:
-      'Ops-focused n8n MCP tools - list, trigger, validate, and audit workflows.',
+      'Ops-focused n8n control surface - list, trigger, validate, and audit workflows.',
     lifecycle: 'Active',
     category: 'Network',
-    repo: `${GH}/n8n-ops-mcp`,
+    repo: `${GH}/n8nctl`,
     npm: 'n8n-ops-mcp',
   },
   {
@@ -189,12 +189,12 @@ export const TOOLS: Tool[] = [
     npm: '@solomonneas/proxmox-mcp',
   },
   {
-    name: 'adguard-mcp',
+    name: 'adguardctl',
     slug: 'adguard-mcp',
-    oneLiner: 'MCP server for AdGuard Home - manage DNS filtering.',
+    oneLiner: 'CLI and MCP-compatible control surface for AdGuard Home DNS filtering.',
     lifecycle: 'WIP',
     category: 'Homelab',
-    repo: `${GH}/adguard-mcp`,
+    repo: `${GH}/adguardctl`,
     npm: '@solomonneas/adguard-mcp',
   },
   {
@@ -217,21 +217,21 @@ export const TOOLS: Tool[] = [
     npm: null,
   },
   {
-    name: 'jellyfin-mcp',
+    name: 'jellyctl',
     slug: 'jellyfin-mcp',
-    oneLiner: 'Jellyfin media server control.',
+    oneLiner: 'Jellyfin media server control from CLI and MCP-compatible clients.',
     lifecycle: 'WIP',
     category: 'Homelab',
-    repo: `${SOLO_GH}/jellyfin-mcp`,
+    repo: `${GH}/jellyctl`,
     npm: 'jellyfin-mcp',
   },
   {
-    name: 'immich-mcp',
+    name: 'immichctl',
     slug: 'immich-mcp',
-    oneLiner: 'Immich photo library.',
+    oneLiner: 'Immich photo library control from CLI and MCP-compatible clients.',
     lifecycle: 'Active',
     category: 'Homelab',
-    repo: `${GH}/immich-mcp`,
+    repo: `${GH}/immichctl`,
     npm: 'immich-mcp',
   },
 ];

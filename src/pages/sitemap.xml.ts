@@ -2,8 +2,8 @@ import { SITE } from '../lib/site.ts';
 import { TOOL_SLUGS } from '../lib/tools.ts';
 
 // trailingSlash:'never' - emit the home page at the bare origin and each tool
-// page at /<slug> with NO trailing slash. lastmod is a fleet-wide build date.
-const LASTMOD = '2026-06-25';
+// page at /<slug> with NO trailing slash. lastmod is the build date.
+const LASTMOD = new Date().toISOString().slice(0, 10);
 
 export async function GET({ site }: { site?: URL }) {
   const origin = (site ?? new URL(SITE.url)).toString().replace(/\/+$/, '');

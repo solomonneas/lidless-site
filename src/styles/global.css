@@ -180,6 +180,11 @@ a { color: inherit; }
   letter-spacing: -0.01em;
 }
 .tool:hover .tool-name { color: var(--accent); }
+.tool-ver {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
 .tool-desc {
   font-size: 0.84rem;
   color: var(--text-muted);

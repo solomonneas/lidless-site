@@ -275,8 +275,8 @@ export const TOOLS: Tool[] = [
   {
     name: 'samba-ad-migration',
     slug: 'samba-ad-migration',
-    oneLiner: 'Automation for migrating Windows AD file shares to Samba on Proxmox with full domain integration.',
-    lifecycle: 'Experimental',
+    oneLiner: 'Automated migration of a Windows AD file share to Samba on Proxmox, with Winbind domain join and permission-preserving data copy.',
+    lifecycle: 'Active',
     category: 'Homelab',
     repo: `${GH}/samba-ad-migration`,
     npm: null,

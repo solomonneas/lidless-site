@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import {
   softwareApplicationLd,
@@ -90,6 +91,7 @@ const clientConfig = `{
           : <span class="cta-note">self-hosted &middot; run from source</span>}
       </div>
     </header>
+    <ToolStatus slug="librenms-mcp" />
 
     <!-- ============================ MATURITY NOTE ============================ -->
     <div class="mb-10 rounded-md p-4" style="border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); background: color-mix(in srgb, var(--warn) 8%, transparent);">

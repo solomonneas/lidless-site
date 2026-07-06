@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import {
   softwareApplicationLd,
@@ -80,6 +81,7 @@ const destructive = [
         <div class="spec"><div class="n">multi</div><div class="l">instances + Sync</div></div>
       </div>
     </header>
+    <ToolStatus slug="adguard-mcp" />
 
     <!-- ============================ WHAT IT DOES ============================ -->
     <section class="mb-10">

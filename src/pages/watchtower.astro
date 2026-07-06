@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import {
   softwareApplicationLd,
@@ -73,6 +74,7 @@ const capabilities = [
         <div class="spec"><div class="n">MIT</div><div class="l">open source</div></div>
       </div>
     </header>
+    <ToolStatus slug="watchtower" />
 
     <!-- ============================ WHAT IT DOES ============================ -->
     <section class="mb-10">

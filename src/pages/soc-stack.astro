@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import {
   softwareApplicationLd,
@@ -80,6 +81,7 @@ const integrations: [string, string][] = [
         <div class="spec"><div class="n">MIT</div><div class="l">license</div></div>
       </div>
     </header>
+    <ToolStatus slug="soc-stack" />
 
     <!-- ============================ WHAT IT DOES ============================ -->
     <section class="mb-10">

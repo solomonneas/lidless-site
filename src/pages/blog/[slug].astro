@@ -1,0 +1,135 @@
+---
+import { marked } from 'marked';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { JalcoProjectBadgesStatic } from '../../components/JalcoProjectBadgesStatic';
+import { getReleasePosts, type ReleasePost } from '../../lib/releases.ts';
+import { fetchLatestRelease, fetchCIStatus } from '../../lib/github-data.ts';
+import { SITE } from '../../lib/site.ts';
+import { graph, breadcrumbLd, canonicalFor } from '../../lib/seo.ts';
+
+export async function getStaticPaths() {
+  const posts = await getReleasePosts();
+  // prev/next within the same tool (older = prev, newer = next).
+  const byTool = new Map<string, ReleasePost[]>();
+  for (const p of posts) {
+    const arr = byTool.get(p.toolSlug) ?? [];
+    arr.push(p);
+    byTool.set(p.toolSlug, arr);
+  }
+  return posts.map((post) => {
+    const siblings = byTool.get(post.toolSlug)!; // already date-desc
+    const i = siblings.findIndex((s) => s.slug === post.slug);
+    return {
+      params: { slug: post.slug },
+      props: {
+        post,
+        prev: siblings[i + 1] ?? null,
+        next: siblings[i - 1] ?? null,
+      },
+    };
+  });
+}
+
+const { post, prev, next } = Astro.props as {
+  post: ReleasePost;
+  prev: ReleasePost | null;
+  next: ReleasePost | null;
+};
+
+const [owner, repo] = post.repo.split('/');
+const release = await fetchLatestRelease(owner, repo);
+const ci = await fetchCIStatus(owner, repo);
+
+const bodyHtml = post.body ? await marked.parse(post.body) : '';
+
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString();
+const canonical = canonicalFor(siteUrl, Astro.url.pathname);
+const title = `${post.tool} ${post.tag}`;
+const description = post.name && post.name !== post.tag ? post.name : `${post.tool} ${post.tag} release notes.`;
+
+const jsonLd = graph([
+  {
+    '@type': 'Article',
+    headline: title,
+    description,
+    datePublished: post.date,
+    dateModified: post.date,
+    mainEntityOfPage: canonical,
+    url: canonical,
+  },
+  breadcrumbLd([
+    { name: 'Lidless', url: 'https://lidless.dev' },
+    { name: 'The Log', url: 'https://lidless.dev/blog' },
+    { name: title, url: canonical },
+  ]),
+]);
+
+const fmt = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-14 max-w-3xl mx-auto">
+    <nav class="text-sm mb-6"><a href="/blog" style="color: var(--text-muted);">&larr; The Log</a></nav>
+
+    <p class="kicker m-0">RELEASE</p>
+    <div class="post-title-row mt-2">
+      <h1 class="post-title">{post.tool}</h1>
+      <span class="post-ver font-mono">{post.tag}</span>
+    </div>
+    <p class="font-mono post-meta mt-3">
+      {fmt(post.date)} &middot; <a href={`/${post.toolSlug}`} style="color: var(--accent);">{post.tool}</a>
+      &middot; <span style="color: var(--text-dim);">{post.category}</span>
+    </p>
+
+    {(release || ci) && (
+      <div class="mt-5">
+        <JalcoProjectBadgesStatic release={release} ci={ci} />
+      </div>
+    )}
+
+    <article class="release-body mt-9" set:html={bodyHtml} />
+    {!bodyHtml && (
+      <p class="release-body mt-9" style="color: var(--text-muted);">
+        No release notes were attached to {post.tag}. See the
+        <a href={post.url} style="color: var(--accent);">release on GitHub</a>.
+      </p>
+    )}
+
+    <div class="post-nav mt-12">
+      {prev && <a class="pn" href={`/blog/${prev.slug}`}>&larr; {prev.tool} {prev.tag}</a>}
+      <span class="flex-1"></span>
+      {next && <a class="pn" href={`/blog/${next.slug}`}>{next.tool} {next.tag} &rarr;</a>}
+    </div>
+
+    <p class="mt-10 text-sm" style="color: var(--text-muted);">
+      <a href={post.url} style="color: var(--accent);">View {post.tag} on GitHub</a>
+      &middot; <a href="/blog" style="color: var(--accent);">All releases</a>
+    </p>
+  </main>
+
+  <style>
+    .post-title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.8rem; }
+    .post-title { font-size: 2rem; font-weight: 700; color: var(--white); line-height: 1.1; margin: 0; }
+    .post-ver { font-size: 0.85rem; color: var(--accent); border: 1px solid var(--hairline-strong); border-radius: 5px; padding: 0.15rem 0.5rem; }
+    .post-meta { font-size: 0.78rem; color: var(--text-dim); margin: 0; }
+    .post-nav { display: flex; align-items: center; gap: 1rem; border-top: 1px solid var(--hairline); padding-top: 1.4rem; }
+    .pn { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; color: var(--text-muted); text-decoration: none; }
+    .pn:hover { color: var(--accent); }
+
+    .release-body { color: var(--text); line-height: 1.7; }
+    .release-body :global(h1),
+    .release-body :global(h2),
+    .release-body :global(h3) { color: var(--white); font-weight: 600; margin: 1.6rem 0 0.6rem; line-height: 1.25; }
+    .release-body :global(h2) { font-size: 1.2rem; }
+    .release-body :global(h3) { font-size: 1.02rem; }
+    .release-body :global(p) { margin: 0.7rem 0; color: var(--text-muted); }
+    .release-body :global(ul),
+    .release-body :global(ol) { margin: 0.7rem 0; padding-left: 1.3rem; color: var(--text-muted); }
+    .release-body :global(li) { margin: 0.3rem 0; }
+    .release-body :global(a) { color: var(--accent); }
+    .release-body :global(code) { font-family: 'IBM Plex Mono', monospace; font-size: 0.85em; color: var(--accent); background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 4px; padding: 0.08em 0.35em; }
+    .release-body :global(pre) { background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .release-body :global(pre code) { background: none; border: 0; padding: 0; color: var(--text); }
+    .release-body :global(hr) { border: 0; border-top: 1px solid var(--hairline); margin: 1.5rem 0; }
+  </style>
+</BaseLayout>

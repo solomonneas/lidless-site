@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS, type Lifecycle } from '../lib/tools.ts';
 import {
   composeTitle,
@@ -100,6 +101,7 @@ const toolGroups: { group: string; tools: string[] }[] = [
           : <span class="cta-note">self-hosted &middot; run from source</span>}
       </div>
     </header>
+    <ToolStatus slug="thehive-mcp" />
 
     <!-- ============================ WHAT IT DOES ============================ -->
     <section class="mb-12">

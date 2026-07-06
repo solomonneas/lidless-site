@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, EXTERNAL } from '../lib/site.ts';
 import { TOOLS, CATEGORY_ORDER, VERSIONS, type Lifecycle } from '../lib/tools.ts';
 import { graph, organizationLd, websiteLd } from '../lib/seo.ts';
+import { fetchLatestRelease, fetchCIStatus, formatRelativeDate } from '../lib/github-data.ts';
+import { parseRepo } from '../lib/releases.ts';
 
 // Homepage JSON-LD: who we are + this site.
 const jsonLd = graph([organizationLd(), websiteLd('Lidless', 'https://lidless.dev')]);
@@ -13,6 +15,23 @@ const lifeClass = (l: Lifecycle) =>
 
 const total = TOOLS.length;
 const categories = CATEGORY_ORDER.length;
+
+// Live per-tool health for the grid: last release date + CI status. Build-time,
+// static (no hydration). Cached per repo, fails soft, so a card just omits the
+// health line when there is no data.
+type Health = { updated: string | null; ci: string | null };
+const health = new Map<string, Health>();
+await Promise.all(
+  TOOLS.map(async (t) => {
+    const p = parseRepo(t.repo);
+    if (!p) return;
+    const [rel, ci] = await Promise.all([
+      fetchLatestRelease(p.owner, p.repo),
+      fetchCIStatus(p.owner, p.repo),
+    ]);
+    health.set(t.slug, { updated: rel?.publishedAt ?? null, ci: ci?.status ?? null });
+  }),
+);
 
 // Section anchors + ordinals per category, matching the nav.
 const CAT_ANCHOR: Record<string, string> = {
@@ -146,9 +165,15 @@ const CAT_NUM: Record<string, string> = {
                     <div class="tool-top">
                       <span class="tool-name">{t.name}</span>
                       {VERSIONS[t.slug] && <span class="tool-ver font-mono">v{VERSIONS[t.slug]}</span>}
+                      {health.get(t.slug)?.ci && (
+                        <span class={`ci-dot ci-${health.get(t.slug)!.ci}`} title={`CI ${health.get(t.slug)!.ci}`}></span>
+                      )}
                       <span class={lifeClass(t.lifecycle)}><span class="dot"></span>{t.lifecycle}</span>
                     </div>
                     <div class="tool-desc">{t.oneLiner}</div>
+                    {health.get(t.slug)?.updated && (
+                      <div class="tool-upd font-mono">updated {formatRelativeDate(health.get(t.slug)!.updated!)}</div>
+                    )}
                   </a>
                 ))}
               </div>
@@ -174,4 +199,13 @@ const CAT_NUM: Record<string, string> = {
       </div>
     </section>
   </main>
+
+  <style>
+    .ci-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .ci-success { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.5); }
+    .ci-failure { background: #f87171; }
+    .ci-pending { background: #fbbf24; }
+    .ci-cancelled, .ci-skipped { background: var(--text-dim); }
+    .tool-upd { font-size: 0.66rem; color: var(--text-dim); margin-top: 0.25rem; letter-spacing: 0.03em; }
+  </style>
 </BaseLayout>

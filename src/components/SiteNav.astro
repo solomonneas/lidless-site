@@ -1,5 +1,15 @@
 ---
 import { NAV_LINKS, EXTERNAL } from '../lib/site.ts';
+import { TOOLS } from '../lib/tools.ts';
+
+// Context-aware GitHub star button: on a tool page (/<slug>) it points at that
+// tool's own repo and shows that repo's star count; everywhere else it points at
+// the lidless-labs org and shows the org total.
+const slug = Astro.url.pathname.replace(/^\/+|\/+$/g, '');
+const tool = TOOLS.find((t) => t.slug === slug);
+const m = tool ? tool.repo.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git|\/|$)/) : null;
+const ghRepo = m ? `${m[1]}/${m[2]}` : '';
+const ghHref = tool ? tool.repo : EXTERNAL.github;
 ---
 <nav class="border-b" style="border-color: var(--hairline);">
   <div class="flex items-center gap-6 px-6 md:px-10 py-4 text-sm">
@@ -15,9 +25,12 @@ import { NAV_LINKS, EXTERNAL } from '../lib/site.ts';
     </a>
     {NAV_LINKS.map((l) => <a href={l.href} class="hidden sm:inline" style="color: var(--text-muted);">{l.label}</a>)}
     <span class="flex-1"></span>
-    <a href={EXTERNAL.github} id="ghStar" data-org="lidless-labs"
+    <a href={ghHref} id="ghStar"
+      data-repo={ghRepo || undefined}
+      data-org={ghRepo ? undefined : 'lidless-labs'}
       class="gh-star inline-flex items-center rounded-md border overflow-hidden"
-      style="border-color: var(--hairline);" aria-label="Lidless on GitHub">
+      style="border-color: var(--hairline);"
+      aria-label={tool ? `Star ${tool.name} on GitHub` : 'Lidless on GitHub'}>
       <span class="inline-flex items-center gap-2 px-3 py-1.5" style="background: var(--bg-panel);">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="var(--accent)" aria-hidden="true">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
@@ -41,33 +54,35 @@ import { NAV_LINKS, EXTERNAL } from '../lib/site.ts';
 </style>
 
 <script>
-  // Live "Lidless on GitHub" star count: the total stars across the lidless-labs
-  // org, one API call, cached 6h. Lidless has no single flagship repo, so the
-  // org total is the meaningful number. Fails soft: no data, the segment stays
-  // hidden and the button is a plain GitHub link.
+  // Star count for the nav GitHub button. On a tool page data-repo is set (that
+  // tool's repo, one API call); elsewhere data-org is set (org total, summed).
+  // Cached 6h. Fails soft, and hides the count at 0 so nothing advertises "0".
   const el = document.getElementById('ghStar');
   if (el) {
-    const org = el.getAttribute('data-org') || '';
+    const repo = el.getAttribute('data-repo');
+    const org = el.getAttribute('data-org');
     const seg = el.querySelector('.gh-star-count') as HTMLElement | null;
     const fmt = (n: number) =>
       n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'
       : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
       : String(n);
-    // Hide the count until there are stars, so a new project does not advertise "0".
     const render = (n: number) => { if (seg && n > 0) { seg.textContent = '★ ' + fmt(n); seg.style.display = 'inline-block'; } };
-    const KEY = 'gh-org-stars:' + org;
+    const KEY = 'gh-stars:' + (repo || 'org:' + org);
     const TTL = 6 * 3600 * 1000;
     try {
       const c = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (c && typeof c.n === 'number' && Date.now() - c.t < TTL) render(c.n);
     } catch {}
-    fetch('https://api.github.com/orgs/' + org + '/repos?per_page=100&type=public', {
-      headers: { Accept: 'application/vnd.github+json' },
-    })
+    const url = repo
+      ? 'https://api.github.com/repos/' + repo
+      : 'https://api.github.com/orgs/' + org + '/repos?per_page=100&type=public';
+    fetch(url, { headers: { Accept: 'application/vnd.github+json' } })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (Array.isArray(d)) {
-          const total = d.reduce((s: number, r: { stargazers_count?: number }) => s + (r.stargazers_count || 0), 0);
+        let total: number | null = null;
+        if (repo && d && typeof d.stargazers_count === 'number') total = d.stargazers_count;
+        else if (org && Array.isArray(d)) total = d.reduce((s: number, r: { stargazers_count?: number }) => s + (r.stargazers_count || 0), 0);
+        if (total !== null) {
           render(total);
           try { localStorage.setItem(KEY, JSON.stringify({ n: total, t: Date.now() })); } catch {}
         }

@@ -17,7 +17,7 @@ export const NAV_LINKS = [
   { label: 'Security / SOC', href: '/#security' },
   { label: 'Network', href: '/#network' },
   { label: 'Homelab', href: '/#homelab' },
-  { label: 'GitHub', href: 'https://github.com/lidless-labs' },
+  { label: 'Blog', href: '/blog' },
 ];
 
 export const EXTERNAL = {

@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { CommitGraph } from '../components/commit-graph';
+import { getReleasePosts } from '../lib/releases.ts';
+import { CATEGORY_ORDER } from '../lib/tools.ts';
+import { SITE } from '../lib/site.ts';
+import { graph, breadcrumbLd, canonicalFor } from '../lib/seo.ts';
+
+const posts = await getReleasePosts();
+
+// Commit-graph timeline of the most recent releases across every tool. Unique
+// slug hashes so two tools sharing a version never collide the rails.
+const graphPosts = posts.slice(0, 16);
+const commits = graphPosts.map((p, i) => ({
+  hash: p.slug,
+  message: p.name && p.name !== p.tag ? `${p.tool} · ${p.name}` : p.tool,
+  author: { name: p.tool },
+  date: p.date,
+  parents: i < graphPosts.length - 1 ? [graphPosts[i + 1].slug] : [],
+  tag: `v${p.version}`,
+}));
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const cats = CATEGORY_ORDER.filter((c) => posts.some((p) => p.category === c));
+
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString();
+const canonical = canonicalFor(siteUrl, Astro.url.pathname);
+const description = 'Release log for the Lidless Labs tools: SOC, network, and homelab MCP servers and apps.';
+
+const jsonLd = graph([
+  { '@type': 'Blog', name: 'Lidless Labs release log', description, url: canonical },
+  breadcrumbLd([
+    { name: 'Lidless', url: 'https://lidless.dev' },
+    { name: 'The Log', url: canonical },
+  ]),
+]);
+
+const fmt = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout title="The Log" description={description} jsonLd={jsonLd}>
+  <main class="px-6 md:px-10 py-16 max-w-4xl mx-auto">
+    <div class="section-rule"><h2 class="kicker m-0">THE LOG</h2></div>
+    <p class="max-w-2xl mt-7" style="color: var(--text-muted);">
+      Every release across the Lidless tools, newest first. Cut from each tool's GitHub releases.
+      <a href="/blog/rss.xml" style="color: var(--accent);">RSS</a>.
+    </p>
+
+    {commits.length > 0 && (
+      <div class="commit-graph-block mt-9">
+        <CommitGraph client:idle commits={commits} className="log-commit-graph" />
+      </div>
+    )}
+
+    {cats.length > 1 && (
+      <div class="log-filter mt-9" id="logFilter" role="group" aria-label="Filter by domain">
+        <button type="button" class="fbtn" data-filter="all" aria-pressed="true">All</button>
+        {cats.map((c) => (
+          <button type="button" class="fbtn" data-filter={slugify(c)} aria-pressed="false">{c}</button>
+        ))}
+      </div>
+    )}
+
+    <ul class="log-list mt-8" id="logList">
+      {posts.map((p) => (
+        <li class="log-post" data-category={slugify(p.category)}>
+          <p class="font-mono log-date">{fmt(p.date)}</p>
+          <div class="log-head">
+            <a href={`/blog/${p.slug}`} class="log-title">{p.tool}</a>
+            <span class="log-ver font-mono">v{p.version}</span>
+            <span class="log-cat font-mono">{p.category}</span>
+          </div>
+          {p.name && p.name !== p.tag && <p class="log-name">{p.name}</p>}
+        </li>
+      ))}
+    </ul>
+
+    {posts.length === 0 && (
+      <p class="mt-10" style="color: var(--text-muted);">No releases logged yet. Check back after the next tool ships.</p>
+    )}
+  </main>
+
+  <style>
+    .commit-graph-block {
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      background: var(--bg-panel);
+      overflow-x: auto;
+    }
+    .commit-graph-block :global(.log-commit-graph) { border-radius: 6px; }
+    .log-filter { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .fbtn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      background: var(--bg-panel);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .fbtn:hover { color: var(--text); }
+    .fbtn[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+    .log-list { list-style: none; margin: 0; padding: 0; }
+    .log-post { padding: 1.1rem 0; border-top: 1px solid var(--hairline); }
+    .log-post:first-child { border-top: 0; }
+    .log-date { font-size: 0.72rem; color: var(--text-dim); margin: 0; }
+    .log-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; margin-top: 0.3rem; }
+    .log-title { font-size: 1.15rem; font-weight: 600; color: var(--white); text-decoration: none; }
+    .log-title:hover { color: var(--accent); }
+    .log-ver { font-size: 0.72rem; color: var(--accent); border: 1px solid var(--hairline-strong); border-radius: 4px; padding: 0.05rem 0.4rem; }
+    .log-cat { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+    .log-name { margin: 0.35rem 0 0; color: var(--text-muted); font-size: 0.95rem; }
+  </style>
+
+  <script>
+    const bar = document.getElementById('logFilter');
+    if (bar) {
+      const btns = Array.from(bar.querySelectorAll('.fbtn'));
+      const posts = Array.from(document.querySelectorAll('#logList .log-post'));
+      bar.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest('.fbtn') as HTMLElement | null;
+        if (!btn) return;
+        const f = btn.dataset.filter;
+        btns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        posts.forEach((p) => {
+          const show = f === 'all' || (p as HTMLElement).dataset.category === f;
+          (p as HTMLElement).hidden = !show;
+        });
+      });
+    }
+  </script>
+</BaseLayout>

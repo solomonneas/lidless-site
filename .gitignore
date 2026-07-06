@@ -4,3 +4,7 @@ dist/
 .vercel/
 .claude/
 .vercel
+
+# Brigade work-loop state (local only, contains OS paths)
+.brigade/
+memory/

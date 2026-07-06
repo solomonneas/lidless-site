@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import {
   softwareApplicationLd,
@@ -106,6 +107,7 @@ const toolGroups: { group: string; tools: { name: string; desc: string }[] }[] =
         )}
       </div>
     </header>
+    <ToolStatus slug="suricata-mcp" />
 
     <!-- ============================ WHAT IT DOES ============================ -->
     <section class="mb-10">

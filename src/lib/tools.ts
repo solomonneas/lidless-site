@@ -29,6 +29,12 @@ export interface Tool {
    * Scoped packages keep their @scope/ prefix.
    */
   npm: string | null;
+  /**
+   * Canonical external home for a tool that lives on its own site (or only on
+   * GitHub) rather than a /<slug> page here. When set, the grid card links out
+   * and the tool is skipped from TOOL_SLUGS (no local page, not in the sitemap).
+   */
+  href?: string;
 }
 
 const GH = 'https://github.com/lidless-labs';
@@ -234,13 +240,55 @@ export const TOOLS: Tool[] = [
     repo: `${GH}/immichctrl`,
     npm: 'immich-mcp',
   },
+  {
+    name: 'vervet',
+    slug: 'vervet',
+    oneLiner:
+      'Network threat hunting for Zeek and Suricata logs. Explainable per-host risk scoring with evidence chains and MITRE ATT&CK mapping.',
+    lifecycle: 'Active',
+    category: 'Security / SOC',
+    repo: `${GH}/vervet`,
+    npm: null,
+    href: 'https://vervet.dev',
+  },
+  {
+    name: 'cutsheet',
+    slug: 'cutsheet',
+    oneLiner:
+      'Network change intelligence: self-hosted config diff and risk analysis for switches, firewalls, and NetOps.',
+    lifecycle: 'WIP',
+    category: 'Network',
+    repo: `${GH}/cutsheet`,
+    npm: null,
+    href: 'https://cutsheet.dev',
+  },
+  {
+    name: 'portgrid',
+    slug: 'portgrid',
+    oneLiner: 'High-density port visualizer for LibreNMS, a modern replacement for the legacy SwitchMap.',
+    lifecycle: 'WIP',
+    category: 'Network',
+    repo: `${GH}/portgrid`,
+    npm: null,
+    href: `${GH}/portgrid`,
+  },
+  {
+    name: 'samba-ad-migration',
+    slug: 'samba-ad-migration',
+    oneLiner: 'Automation for migrating Windows AD file shares to Samba on Proxmox with full domain integration.',
+    lifecycle: 'Experimental',
+    category: 'Homelab',
+    repo: `${GH}/samba-ad-migration`,
+    npm: null,
+    href: `${GH}/samba-ad-migration`,
+  },
 ];
 
 /** Category order for rendering the grid groups. */
 export const CATEGORY_ORDER: Category[] = ['Security / SOC', 'Network', 'Homelab'];
 
-/** All slugs, for the sitemap and link checks. */
-export const TOOL_SLUGS: string[] = TOOLS.map((t) => t.slug);
+/** Slugs that have a local /<slug> page (external-home tools excluded), for the sitemap and link checks. */
+export const TOOL_SLUGS: string[] = TOOLS.filter((t) => !t.href).map((t) => t.slug);
 
 // --- BEGIN AUTO-GENERATED VERSIONS (managed by lidless-fleet-kit/bin/sync-versions.mjs) ---
 /** Latest published version per tool slug. Keys without a release are omitted. */

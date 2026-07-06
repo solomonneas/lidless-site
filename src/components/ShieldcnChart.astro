@@ -1,0 +1,52 @@
+---
+interface Props {
+  darkSrc: string;
+  lightSrc: string;
+  alt: string;
+  href?: string;
+  width?: number;
+  height?: number;
+}
+
+const { darkSrc, lightSrc, alt, href, width = 760, height = 240 } = Astro.props;
+---
+
+<figure class="shield-chart">
+  {href ? (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      <img class="shield-dark" src={darkSrc} alt={alt} width={width} height={height} loading="lazy" />
+      <img class="shield-light" src={lightSrc} alt={alt} width={width} height={height} loading="lazy" />
+    </a>
+  ) : (
+    <>
+      <img class="shield-dark" src={darkSrc} alt={alt} width={width} height={height} loading="lazy" />
+      <img class="shield-light" src={lightSrc} alt={alt} width={width} height={height} loading="lazy" />
+    </>
+  )}
+</figure>
+
+<style>
+  .shield-chart {
+    margin: 1.5rem 0;
+  }
+
+  .shield-chart a {
+    display: block;
+    border-bottom: none;
+  }
+
+  .shield-chart img {
+    display: block;
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+  }
+
+  :global([data-theme="light"]) .shield-dark,
+  :global([data-theme="dark"]) .shield-light {
+    display: none !important;
+  }
+</style>

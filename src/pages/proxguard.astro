@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import {
   softwareApplicationLd,
@@ -81,6 +82,7 @@ const features: [string, string][] = [
         <div class="spec"><div class="n">100%</div><div class="l">client-side, no data leaves the browser</div></div>
       </div>
     </header>
+    <ToolStatus slug="proxguard" />
 
     <!-- ============================ WHAT IT DOES ============================ -->
     <section class="mb-10">

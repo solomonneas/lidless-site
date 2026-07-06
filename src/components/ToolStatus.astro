@@ -1,0 +1,54 @@
+---
+// Live project status for a tool page: latest release + CI badge and a small
+// commit graph of recent activity, pulled from GitHub at build time. Renders
+// nothing when there is no data (unreleased tool, no CI, rate limit), so it is
+// safe to drop onto every tool page. A trust signal for a security catalog:
+// each page shows the tool is released, green, and moving.
+import { TOOLS } from '../lib/tools.ts';
+import { parseRepo } from '../lib/releases.ts';
+import { JalcoProjectBadgesStatic } from './JalcoProjectBadgesStatic';
+import { CommitGraph } from './commit-graph';
+import { fetchLatestRelease, fetchCIStatus, fetchRecentCommits } from '../lib/github-data.ts';
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+
+const tool = TOOLS.find((t) => t.slug === slug);
+const parsed = tool ? parseRepo(tool.repo) : null;
+
+const release = parsed ? await fetchLatestRelease(parsed.owner, parsed.repo) : null;
+const ci = parsed ? await fetchCIStatus(parsed.owner, parsed.repo) : null;
+const commits = parsed ? await fetchRecentCommits(parsed.owner, parsed.repo, 6) : [];
+
+const show = Boolean(release || ci || commits.length > 0);
+---
+{show && (
+  <section class="tool-status mb-10">
+    <div class="section-rule"><h2 class="kicker m-0">LIVE STATUS</h2></div>
+    {(release || ci) && (
+      <div class="mt-6">
+        <JalcoProjectBadgesStatic release={release} ci={ci} />
+      </div>
+    )}
+    {commits.length > 0 && (
+      <div class="commit-graph-block mt-6">
+        <CommitGraph client:idle commits={commits} className="tool-commit-graph" />
+      </div>
+    )}
+    <p class="status-note font-mono mt-4">Latest release, CI, and recent commits, live from GitHub.</p>
+  </section>
+)}
+
+<style>
+  .commit-graph-block {
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    background: var(--bg-panel);
+    overflow-x: auto;
+  }
+  .commit-graph-block :global(.tool-commit-graph) { border-radius: 6px; }
+  .status-note { font-size: 0.72rem; color: var(--text-dim); }
+</style>

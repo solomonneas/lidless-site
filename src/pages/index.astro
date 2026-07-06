@@ -161,9 +161,9 @@ const CAT_NUM: Record<string, string> = {
               <div class="col-rule"></div>
               <div class="watch-list">
                 {inCat.map((t) => (
-                  <a class="tool" href={`/${t.slug}`}>
+                  <a class="tool" href={t.href ?? `/${t.slug}`} target={t.href ? '_blank' : undefined} rel={t.href ? 'noopener noreferrer' : undefined}>
                     <div class="tool-top">
-                      <span class="tool-name">{t.name}</span>
+                      <span class="tool-name">{t.name}{t.href && <span class="ext" aria-hidden="true"> ↗</span>}</span>
                       {VERSIONS[t.slug] && <span class="tool-ver font-mono">v{VERSIONS[t.slug]}</span>}
                       {health.get(t.slug)?.ci && (
                         <span class={`ci-dot ci-${health.get(t.slug)!.ci}`} title={`CI ${health.get(t.slug)!.ci}`}></span>
@@ -207,5 +207,6 @@ const CAT_NUM: Record<string, string> = {
     .ci-pending { background: #fbbf24; }
     .ci-cancelled, .ci-skipped { background: var(--text-dim); }
     .tool-upd { font-size: 0.66rem; color: var(--text-dim); margin-top: 0.25rem; letter-spacing: 0.03em; }
+    .ext { color: var(--text-dim); font-size: 0.75em; }
   </style>
 </BaseLayout>

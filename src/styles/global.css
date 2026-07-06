@@ -123,8 +123,11 @@ a { color: inherit; }
 .btn-ghost:hover {
   transform: translateY(-1px);
   border-color: var(--accent);
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.1), rgba(56, 189, 248, 0.03));
-  box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.12), rgba(56, 189, 248, 0.04));
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.25),
+    0 12px 28px -8px rgba(56, 189, 248, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* ---------------------------------------------------------------- catalog: three parallel watch-lists */

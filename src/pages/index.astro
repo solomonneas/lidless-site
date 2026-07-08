@@ -168,7 +168,9 @@ const CAT_NUM: Record<string, string> = {
                       {health.get(t.slug)?.ci && (
                         <span class={`ci-dot ci-${health.get(t.slug)!.ci}`} title={`CI ${health.get(t.slug)!.ci}`}></span>
                       )}
-                      <span class={lifeClass(t.lifecycle)}><span class="dot"></span>{t.lifecycle}</span>
+                      {t.lifecycle !== 'Active' && (
+                        <span class={lifeClass(t.lifecycle)}><span class="dot"></span>{t.lifecycle}</span>
+                      )}
                     </div>
                     <div class="tool-desc">{t.oneLiner}</div>
                     {health.get(t.slug)?.updated && (

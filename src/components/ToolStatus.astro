@@ -1,14 +1,21 @@
 ---
-// Live project status for a tool page: latest release + CI badge and a small
+// Live project status for a tool page: a jal-co repo card (stars, language,
+// topics, license, last-updated) plus latest release + CI badge and a small
 // commit graph of recent activity, pulled from GitHub at build time. Renders
 // nothing when there is no data (unreleased tool, no CI, rate limit), so it is
 // safe to drop onto every tool page. A trust signal for a security catalog:
-// each page shows the tool is released, green, and moving.
+// each page shows the tool is real, released, green, and moving.
 import { TOOLS } from '../lib/tools.ts';
 import { parseRepo } from '../lib/releases.ts';
 import { JalcoProjectBadgesStatic } from './JalcoProjectBadgesStatic';
+import { JalcoRepoCardStatic, type RepoAction } from './JalcoRepoCardStatic';
 import { CommitGraph } from './commit-graph';
-import { fetchLatestRelease, fetchCIStatus, fetchRecentCommits } from '../lib/github-data.ts';
+import {
+  fetchLatestRelease,
+  fetchCIStatus,
+  fetchRecentCommits,
+  fetchGitHubRepoData,
+} from '../lib/github-data.ts';
 
 interface Props {
   slug: string;
@@ -18,15 +25,46 @@ const { slug } = Astro.props;
 const tool = TOOLS.find((t) => t.slug === slug);
 const parsed = tool ? parseRepo(tool.repo) : null;
 
-const release = parsed ? await fetchLatestRelease(parsed.owner, parsed.repo) : null;
-const ci = parsed ? await fetchCIStatus(parsed.owner, parsed.repo) : null;
-const commits = parsed ? await fetchRecentCommits(parsed.owner, parsed.repo, 6) : [];
+const [repoData, release, ci, commits] = parsed
+  ? await Promise.all([
+      fetchGitHubRepoData(parsed.owner, parsed.repo),
+      fetchLatestRelease(parsed.owner, parsed.repo),
+      fetchCIStatus(parsed.owner, parsed.repo),
+      fetchRecentCommits(parsed.owner, parsed.repo, 6),
+    ])
+  : [null, null, null, []];
 
-const show = Boolean(release || ci || commits.length > 0);
+// Card actions complement the hero CTAs: send people to the commits, the
+// readme, npm (when published), and the star page.
+const repoBase = parsed ? `https://github.com/${parsed.owner}/${parsed.repo}` : tool?.repo ?? '';
+const actions: RepoAction[] = [];
+if (repoBase) {
+  actions.push({ href: `${repoBase}/commits`, label: 'Commits', kind: 'commits' });
+  actions.push({ href: `${repoBase}#readme`, label: 'README', kind: 'readme' });
+}
+if (tool?.npm) {
+  actions.push({ href: `https://www.npmjs.com/package/${tool.npm}`, label: 'npm', kind: 'npm' });
+}
+if (repoBase) actions.push({ href: `${repoBase}/stargazers`, label: 'Star', kind: 'stars' });
+
+const show = Boolean(repoData || release || ci || commits.length > 0);
 ---
 {show && (
   <section class="tool-status mb-10">
     <div class="section-rule"><h2 class="kicker m-0">LIVE STATUS</h2></div>
+
+    {repoData && tool && parsed && (
+      <div class="repo-card-block mt-6">
+        <JalcoRepoCardStatic
+          repoSlug={`${parsed.owner}/${parsed.repo}`}
+          label="Open Source"
+          desc={tool.oneLiner}
+          data={repoData}
+          actions={actions}
+        />
+      </div>
+    )}
+
     {(release || ci) && (
       <div class="mt-6">
         <JalcoProjectBadgesStatic release={release} ci={ci} />
@@ -37,11 +75,18 @@ const show = Boolean(release || ci || commits.length > 0);
         <CommitGraph client:idle commits={commits} className="tool-commit-graph" />
       </div>
     )}
-    <p class="status-note font-mono mt-4">Latest release, CI, and recent commits, live from GitHub.</p>
+    <p class="status-note font-mono mt-4">Live from GitHub: stars, latest release, CI, and recent commits.</p>
   </section>
 )}
 
 <style>
+  .repo-card-block :global(.jalco-repo-card) {
+    border-left: 3px solid var(--accent);
+    background: var(--bg-panel);
+  }
+  .repo-card-block :global(a[data-slot="repo-action-link"]:hover) {
+    transform: translateY(-1px);
+  }
   .commit-graph-block {
     border: 1px solid var(--hairline);
     border-radius: 8px;

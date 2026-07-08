@@ -14,9 +14,12 @@
   --bg-panel: #0d1119;
   --bg-panel-2: #111824;
   --white: #f4f7fa;
-  --text: #cdd6df;
-  --text-muted: #818c9b;
-  --text-dim: #5a6573;
+  /* Readability ramp: body copy lives on --text / --text-muted, so both are
+     kept high-contrast against the near-black ground. --text-dim is for
+     captions and metadata only, never for a full sentence of prose. */
+  --text: #dbe3ec;
+  --text-muted: #aab6c4;
+  --text-dim: #7c8894;
   --accent: #38bdf8;
   --accent-dim: #1f7fb0;
   --accent-glow: color-mix(in srgb, var(--accent) 22%, transparent);
@@ -35,7 +38,8 @@ body {
   margin: 0;
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.62;
 }
 
 .font-display {
@@ -165,33 +169,56 @@ a { color: inherit; }
 }
 .col-rule { border-top: 1px solid var(--hairline); margin-bottom: 0.5rem; }
 
-.watch-list { display: flex; flex-direction: column; }
+.watch-list { display: flex; flex-direction: column; gap: 0.15rem; }
 .tool {
   display: block;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--hairline);
-  transition: padding-left 0.15s ease;
+  position: relative;
+  padding: 0.85rem 0.9rem 0.85rem 0.85rem;
+  border: 1px solid transparent;
+  border-bottom-color: var(--hairline);
+  border-radius: 8px;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
-.tool:last-child { border-bottom: 0; }
-.tool:hover { padding-left: 0.35rem; }
+.tool::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 50%;
+  height: 0; width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: translateY(-50%);
+  transition: height 0.18s ease;
+}
+.tool:last-child { border-bottom-color: transparent; }
+.tool:hover {
+  background: var(--bg-panel);
+  border-color: var(--hairline-strong);
+  border-bottom-color: var(--hairline-strong);
+}
+.tool:hover::before { height: calc(100% - 1.4rem); }
 .tool-top { display: flex; align-items: center; gap: 0.6rem; }
 .tool-name {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-weight: 500;
-  font-size: 0.92rem;
+  font-size: 0.98rem;
   color: var(--white);
   letter-spacing: -0.01em;
 }
 .tool:hover .tool-name { color: var(--accent); }
 .tool-ver {
-  font-size: 0.72rem;
+  margin-left: auto;
+  font-size: 0.74rem;
   color: var(--text-dim);
   letter-spacing: 0.02em;
 }
+/* when a tool has no version, the CI dot carries the right edge */
+.tool-top .ci-dot { margin-left: auto; }
+.tool-top .tool-ver ~ .ci-dot { margin-left: 0; }
 .tool-desc {
-  font-size: 0.84rem;
+  font-size: 0.92rem;
   color: var(--text-muted);
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
+  line-height: 1.5;
 }
 
 /* lifecycle mark: a small dot + label, no badge chrome */
@@ -265,8 +292,8 @@ a { color: inherit; }
   border-bottom: 1px solid var(--hairline);
   align-items: baseline;
 }
-.cap-name { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.9rem; color: var(--white); }
-.cap-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; }
+.cap-name { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.95rem; color: var(--white); }
+.cap-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; }
 .cap-group-label {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;

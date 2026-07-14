@@ -4,6 +4,8 @@ import ToolStatus from '../components/ToolStatus.astro';
 import { TOOLS } from '../lib/tools.ts';
 import { PAGES } from '../lib/tool-pages.ts';
 import { softwareApplicationLd, organizationLd, absoluteImage, graph } from '../lib/seo.ts';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export function getStaticPaths() {
   return Object.keys(PAGES).map((slug) => ({ params: { slug } }));
@@ -13,6 +15,14 @@ const { slug } = Astro.params;
 const tool = TOOLS.find((t) => t.slug === slug)!;
 const page = PAGES[slug!]!;
 const { name, lifecycle, category, repo, npm } = tool;
+
+// Plating terminal demos (public/demos/*.svg) are CSS-animated; they only play
+// when inlined, not via <img>. Read the SVG at build and inline it. Real photo
+// screenshots keep using <img>.
+const demoSvg =
+  page.proof.type === 'screenshot' && page.proof.src.startsWith('/demos/')
+    ? readFileSync(join(process.cwd(), 'public', page.proof.src), 'utf8')
+    : null;
 
 const pageUrl = `https://lidless.dev/${slug}`;
 const title = `${name} - ${page.value.split(/[.:]/)[0].trim().toLowerCase()}`.slice(0, 68);
@@ -89,7 +99,9 @@ const catAnchor: Record<string, string> = {
       <section class="tp-sec">
         <div class="tp-srule"><h2>See it work</h2></div>
         <figure class="tp-shot">
-          <img src={page.proof.src} alt={page.proof.alt} loading="lazy" />
+          {demoSvg
+            ? <div class="tp-demo" role="img" aria-label={page.proof.alt} set:html={demoSvg}></div>
+            : <img src={page.proof.src} alt={page.proof.alt} loading="lazy" />}
           <figcaption>{page.proof.caption}</figcaption>
         </figure>
       </section>
@@ -205,6 +217,8 @@ const catAnchor: Record<string, string> = {
 
   .tp-shot { margin: 0; border: 1px solid var(--hairline-strong); border-radius: 11px; overflow: hidden; }
   .tp-shot img { display: block; width: 100%; height: auto; }
+  .tp-demo { width: 100%; background: #0a0e15; }
+  .tp-demo :global(svg) { display: block; width: 100%; height: auto; }
   .tp-shot figcaption { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11px; color: var(--text-dim); padding: 10px 14px; border-top: 1px solid var(--hairline); }
 
   .tp-capgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

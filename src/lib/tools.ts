@@ -290,19 +290,7 @@ export const CATEGORY_ORDER: Category[] = ['Security / SOC', 'Network', 'Homelab
 /** Slugs that have a local /<slug> page (external-home tools excluded), for the sitemap and link checks. */
 export const TOOL_SLUGS: string[] = TOOLS.filter((t) => !t.href).map((t) => t.slug);
 
-// --- BEGIN AUTO-GENERATED VERSIONS (managed by lidless-fleet-kit/bin/sync-versions.mjs) ---
-/** Latest published version per tool slug. Keys without a release are omitted. */
-export const VERSIONS: Record<string, string> = {
-  'adguard-mcp': '0.2.0',
-  'cortex-mcp': '1.2.0',
-  'librenms-mcp': '0.2.0',
-  'misp-mcp': '1.2.0',
-  'mitre-mcp': '2.0.1',
-  'n8n-ops-mcp': '0.9.0',
-  'proxmox-mcp': '0.3.0',
-  'suricata-mcp': '2.0.0',
-  'thehive-mcp': '1.1.0',
-  'wazuh-mcp': '1.1.0',
-  'zeek-mcp': '3.0.0',
-};
-// --- END AUTO-GENERATED VERSIONS ---
+// Tool versions are rendered live from each repo's latest GitHub release tag in
+// src/pages/index.astro (see the `health` map), so there is no static version map
+// to drift. The old lidless-fleet-kit/bin/sync-versions.mjs target lived here and
+// is now obsolete for this file.

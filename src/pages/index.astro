@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, EXTERNAL } from '../lib/site.ts';
-import { TOOLS, CATEGORY_ORDER, VERSIONS, type Lifecycle } from '../lib/tools.ts';
+import { TOOLS, CATEGORY_ORDER, type Lifecycle } from '../lib/tools.ts';
 import { graph, organizationLd, websiteLd } from '../lib/seo.ts';
 import { fetchLatestRelease, fetchCIStatus, formatRelativeDate } from '../lib/github-data.ts';
 import { parseRepo } from '../lib/releases.ts';
@@ -19,7 +19,7 @@ const categories = CATEGORY_ORDER.length;
 // Live per-tool health for the grid: last release date + CI status. Build-time,
 // static (no hydration). Cached per repo, fails soft, so a card just omits the
 // health line when there is no data.
-type Health = { updated: string | null; ci: string | null };
+type Health = { updated: string | null; ci: string | null; version: string | null };
 const health = new Map<string, Health>();
 await Promise.all(
   TOOLS.map(async (t) => {
@@ -29,7 +29,15 @@ await Promise.all(
       fetchLatestRelease(p.owner, p.repo),
       fetchCIStatus(p.owner, p.repo),
     ]);
-    health.set(t.slug, { updated: rel?.publishedAt ?? null, ci: ci?.status ?? null });
+    // Version is the live latest-release tag, normalized to vX.Y.Z (handles bare
+    // v1.2.3 and prefixed tags like "proxmoxctrl v0.5.1"). Rendering it live means
+    // the grid can't drift from GitHub the way the old hand-maintained map did.
+    const semver = rel?.tag.match(/\d+\.\d+\.\d+/);
+    health.set(t.slug, {
+      updated: rel?.publishedAt ?? null,
+      ci: ci?.status ?? null,
+      version: semver ? `v${semver[0]}` : null,
+    });
   }),
 );
 
@@ -164,7 +172,7 @@ const CAT_NUM: Record<string, string> = {
                   <a class="tool" href={t.href ?? `/${t.slug}`} target={t.href ? '_blank' : undefined} rel={t.href ? 'noopener noreferrer' : undefined}>
                     <div class="tool-top">
                       <span class="tool-name">{t.name}{t.href && <span class="ext" aria-hidden="true"> ↗</span>}</span>
-                      {VERSIONS[t.slug] && <span class="tool-ver font-mono">v{VERSIONS[t.slug]}</span>}
+                      {health.get(t.slug)?.version && <span class="tool-ver font-mono">{health.get(t.slug)!.version}</span>}
                       {health.get(t.slug)?.ci && (
                         <span class={`ci-dot ci-${health.get(t.slug)!.ci}`} title={`CI ${health.get(t.slug)!.ci}`}></span>
                       )}

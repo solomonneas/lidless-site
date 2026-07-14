@@ -5,7 +5,7 @@
    Cold near-black ground, electric-blue accent, white type. Dark only -
    the unsleeping eye does not switch to a day mode.
 
-   Fonts (Instrument Sans + IBM Plex Mono) are loaded via a Google Fonts
+   Fonts (Instrument Sans + JetBrains Mono) are loaded via a Google Fonts
    <link> in BaseLayout.astro.
    =========================================================================== */
 :root {
@@ -43,14 +43,14 @@ body {
 }
 
 .font-display {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-weight: 600;
   letter-spacing: 0.06em;
 }
-.font-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
-.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.font-mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
 .kicker {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-weight: 500;
   font-size: 0.72rem;
   letter-spacing: 0.14em;
@@ -83,7 +83,7 @@ a { color: inherit; }
 
 /* Wordmark - white offset, no glow */
 .wordmark {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--white);
@@ -151,13 +151,13 @@ a { color: inherit; }
 .col { scroll-margin-top: 2rem; }
 .col-head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1.25rem; }
 .col-head .num {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.72rem;
   color: var(--accent);
   letter-spacing: 0.08em;
 }
 .col-head h2 {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-weight: 500;
   font-size: 0.78rem;
   letter-spacing: 0.12em;
@@ -167,7 +167,7 @@ a { color: inherit; }
 }
 .col-head .count {
   margin-left: auto;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.7rem;
   color: var(--text-dim);
 }
@@ -202,7 +202,7 @@ a { color: inherit; }
 .tool:hover::before { height: calc(100% - 1.4rem); }
 .tool-top { display: flex; align-items: center; gap: 0.6rem; }
 .tool-name {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-weight: 500;
   font-size: 0.98rem;
   color: var(--white);
@@ -231,7 +231,7 @@ a { color: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -252,7 +252,7 @@ a { color: inherit; }
 
 /* ---------------------------------------------------------------- lifecycle badge (tool pages) */
 .badge {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.62rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -282,7 +282,7 @@ a { color: inherit; }
 /* tool page: prominent GitHub / npm CTAs at the top of the hero */
 .tool-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: 1.25rem; }
 .cta-note {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.78rem; color: var(--text-dim); letter-spacing: 0.04em; align-self: center;
 }
 
@@ -296,10 +296,10 @@ a { color: inherit; }
   border-bottom: 1px solid var(--hairline);
   align-items: baseline;
 }
-.cap-name { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.95rem; color: var(--white); }
+.cap-name { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.95rem; color: var(--white); }
 .cap-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; }
 .cap-group-label {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--accent); margin: 1.5rem 0 0.25rem;
 }
@@ -320,7 +320,7 @@ a { color: inherit; }
   padding: 1rem 1.1rem;
 }
 .spec-strip .spec .n {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 1.3rem;
   color: var(--accent);
 }
@@ -332,7 +332,7 @@ a { color: inherit; }
 
 /* Terminal block (tool pages) */
 .term {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.82rem;
   line-height: 1.7;
   background: var(--term-bg);
@@ -350,7 +350,7 @@ a { color: inherit; }
   position: absolute;
   top: 0.45rem;
   right: 0.45rem;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;

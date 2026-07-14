@@ -82,6 +82,9 @@ const CAT_NUM: Record<string, string> = {
         (() => {
           const e = document.querySelector('.lid-eye');
           if (!e) return;
+          // Respect prefers-reduced-motion: leave the eye open and centered, but
+          // skip the cursor/scroll tracking loop and its listeners entirely.
+          if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
           const b = e.querySelector('.eyeball');
           let mx = null, my = null, cx = 0, cy = 0, ly = 0, gl = 0, tMouse = -1e9, tScroll = -1e9;
           const MAX = 14, MAXY = 12, NEAR = 620;

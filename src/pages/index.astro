@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, EXTERNAL } from '../lib/site.ts';
 import { TOOLS, CATEGORY_ORDER, type Lifecycle } from '../lib/tools.ts';
 import { graph, organizationLd, websiteLd } from '../lib/seo.ts';
-import { fetchLatestRelease, fetchCIStatus, formatRelativeDate } from '../lib/github-data.ts';
+import { fetchLatestRelease, fetchCIStatus, fetchGitHubRepoData, formatRelativeDate } from '../lib/github-data.ts';
 import { parseRepo } from '../lib/releases.ts';
 
 // Homepage JSON-LD: who we are + this site.
@@ -25,16 +25,19 @@ await Promise.all(
   TOOLS.map(async (t) => {
     const p = parseRepo(t.repo);
     if (!p) return;
-    const [rel, ci] = await Promise.all([
+    const [rel, ci, repoData] = await Promise.all([
       fetchLatestRelease(p.owner, p.repo),
       fetchCIStatus(p.owner, p.repo),
+      fetchGitHubRepoData(p.owner, p.repo),
     ]);
+    // "updated" is the repo's last push (pushed_at), the same signal GitHub uses
+    // for "Updated N days ago", so it reflects real activity, not the last
+    // release. Falls back to the release date if repo data is unavailable.
     // Version is the live latest-release tag, normalized to vX.Y.Z (handles bare
-    // v1.2.3 and prefixed tags like "proxmoxctrl v0.5.1"). Rendering it live means
-    // the grid can't drift from GitHub the way the old hand-maintained map did.
+    // v1.2.3 and prefixed tags like "proxmoxctrl v0.5.1").
     const semver = rel?.tag.match(/\d+\.\d+\.\d+/);
     health.set(t.slug, {
-      updated: rel?.publishedAt ?? null,
+      updated: repoData?.updatedAt ?? rel?.publishedAt ?? null,
       ci: ci?.status ?? null,
       version: semver ? `v${semver[0]}` : null,
     });

@@ -46,7 +46,7 @@ export const TOOLS: Tool[] = [
     name: 'wazuh-mcp',
     slug: 'wazuh-mcp',
     oneLiner:
-      'MCP server for the Wazuh SIEM/XDR - query alerts, agents, and vulnerabilities from your AI client.',
+      'Read your Wazuh SIEM from your agent: alerts, agents, and CVEs, read-only.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/wazuh-mcp`,
@@ -55,7 +55,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'misp-mcp',
     slug: 'misp-mcp',
-    oneLiner: 'MCP server for MISP - threat-intelligence sharing and lookups.',
+    oneLiner: 'Turn MISP threat intel into answers: events, correlations, and IOC exports on demand.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/misp-mcp`,
@@ -64,7 +64,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'suricata-mcp',
     slug: 'suricata-mcp',
-    oneLiner: 'MCP server for Suricata IDS/IPS - analyze network-security alerts.',
+    oneLiner: 'Hunt Suricata and Zeek NSM logs from your agent: alerts, flows, and C2 analytics.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/suricata-mcp`,
@@ -73,7 +73,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'thehive-mcp',
     slug: 'thehive-mcp',
-    oneLiner: 'MCP server for TheHive - security incident response.',
+    oneLiner: 'Drive TheHive incident response from your agent: cases, alerts, tasks, observables.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/thehive-mcp`,
@@ -82,7 +82,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'cortex-mcp',
     slug: 'cortex-mcp',
-    oneLiner: 'MCP server for Cortex (StrangeBee/TheHive) - observable analysis.',
+    oneLiner: 'Detonate an indicator and get one verdict: Cortex analyzers, confirm-gated.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/cortex-mcp`,
@@ -91,7 +91,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'mitre-mcp',
     slug: 'mitre-mcp',
-    oneLiner: 'MCP server for the MITRE ATT&CK knowledge base.',
+    oneLiner: 'Map alerts to ATT&CK and profile threat groups without leaving your agent.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/mitre-mcp`,
@@ -100,7 +100,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'zeek-mcp',
     slug: 'zeek-mcp',
-    oneLiner: 'MCP server for Zeek + Suricata network logs.',
+    oneLiner: 'Query and correlate Zeek and Suricata NSM logs from your agent.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${GH}/zeek-mcp`,
@@ -137,7 +137,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'hotwash',
     slug: 'hotwash',
-    oneLiner: 'Interactive incident-response runbooks.',
+    oneLiner: 'Build IR playbooks as flowcharts and run them step by step, agent-drivable.',
     lifecycle: 'Active',
     category: 'Security / SOC',
     repo: `${SOLO_GH}/hotwash`,
@@ -148,7 +148,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'librenmsctrl',
     slug: 'librenms-mcp',
-    oneLiner: 'CLI and MCP-compatible control surface for LibreNMS network monitoring.',
+    oneLiner: 'Pipe LibreNMS devices, ports, and alerts to shells, cron, and agents. Writes gated.',
     lifecycle: 'Active',
     category: 'Network',
     repo: `${GH}/librenmsctrl`,
@@ -158,7 +158,7 @@ export const TOOLS: Tool[] = [
     name: 'n8nctrl',
     slug: 'n8n-ops-mcp',
     oneLiner:
-      'Ops-focused n8n control surface - list, trigger, validate, and audit workflows.',
+      'Drive n8n workflows from shells, cron, and agents: inspect, validate, run, audit.',
     lifecycle: 'Active',
     category: 'Network',
     repo: `${GH}/n8nctrl`,
@@ -168,7 +168,7 @@ export const TOOLS: Tool[] = [
     name: 'watchtower',
     slug: 'watchtower',
     oneLiner:
-      'A NOC dashboard for network devices, interfaces, VMs, and alerts via LibreNMS.',
+      'NOC dashboard: device status, topology, and VM metrics via LibreNMS and Proxmox.',
     lifecycle: 'Active',
     category: 'Network',
     repo: `${SOLO_GH}/watchtower`,
@@ -177,7 +177,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'eero-cli',
     slug: 'eero-cli',
-    oneLiner: 'Manage an eero mesh network from the shell.',
+    oneLiner: 'Drive the eero mesh API from the shell: SMS auth, device filtering, bulk block.',
     lifecycle: 'Active',
     category: 'Network',
     repo: `${SOLO_GH}/eero-cli`,
@@ -188,7 +188,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'proxmox-mcp',
     slug: 'proxmox-mcp',
-    oneLiner: 'MCP server for Proxmox VE - manage VMs, containers, and nodes.',
+    oneLiner: 'Operate Proxmox VMs, containers, and nodes from your agent, every write gated.',
     lifecycle: 'Active',
     category: 'Homelab',
     repo: `${GH}/proxmox-mcp`,
@@ -197,7 +197,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'adguardctrl',
     slug: 'adguard-mcp',
-    oneLiner: 'CLI and MCP-compatible control surface for AdGuard Home DNS filtering.',
+    oneLiner: 'Run AdGuard Home DNS filtering from shells and agents, destructive writes gated.',
     lifecycle: 'Active',
     category: 'Homelab',
     repo: `${GH}/adguardctrl`,
@@ -206,7 +206,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'proxguard',
     slug: 'proxguard',
-    oneLiner: 'Proxmox VE CIS security auditor.',
+    oneLiner: 'Audit Proxmox against CIS benchmarks: config parsers and remediation scripts.',
     lifecycle: 'Active',
     category: 'Homelab',
     repo: `${SOLO_GH}/proxguard`,
@@ -225,7 +225,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'jellyctrl',
     slug: 'jellyfin-mcp',
-    oneLiner: 'Jellyfin media server control from CLI and MCP-compatible clients.',
+    oneLiner: 'Drive Jellyfin libraries, sessions, and users from a CLI or MCP, writes gated.',
     lifecycle: 'Active',
     category: 'Homelab',
     repo: `${GH}/jellyctrl`,
@@ -234,7 +234,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'immichctrl',
     slug: 'immich-mcp',
-    oneLiner: 'Immich photo library control from CLI and MCP-compatible clients.',
+    oneLiner: 'One typed control surface for Immich: search, albums, and duplicate audits.',
     lifecycle: 'Active',
     category: 'Homelab',
     repo: `${GH}/immichctrl`,

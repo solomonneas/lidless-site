@@ -68,9 +68,9 @@ const catAnchor: Record<string, string> = {
     <!-- PROOF -->
     {page.proof.type === 'session' && (
       <section class="tp-sec">
-        <div class="tp-srule"><h2 class="tp-kicker">See it work</h2><p>one question, the tools it calls, the answer</p></div>
+        <div class="tp-srule"><h2>See it work</h2><p>one question, the tools it calls, the answer</p></div>
         <div class="tp-session">
-          <div class="tp-sbar"><span class="tp-l r"></span><span class="tp-l a"></span><span class="tp-l g"></span><span class="tp-st">{page.proof.label}</span></div>
+          <div class="tp-sbar"><span class="tp-st">{page.proof.label}</span></div>
           <div class="tp-sbody">
             {page.proof.turns.map((t) => (
               <>
@@ -87,7 +87,7 @@ const catAnchor: Record<string, string> = {
     )}
     {page.proof.type === 'screenshot' && (
       <section class="tp-sec">
-        <div class="tp-srule"><h2 class="tp-kicker">See it work</h2></div>
+        <div class="tp-srule"><h2>See it work</h2></div>
         <figure class="tp-shot">
           <img src={page.proof.src} alt={page.proof.alt} loading="lazy" />
           <figcaption>{page.proof.caption}</figcaption>
@@ -97,14 +97,14 @@ const catAnchor: Record<string, string> = {
 
     <!-- WHAT IT DOES -->
     <section class="tp-sec">
-      <div class="tp-srule"><h2 class="tp-kicker">What it does</h2></div>
+      <div class="tp-srule"><h2>What it does</h2></div>
       <p class="tp-body">{page.what}</p>
     </section>
 
     <!-- CAPABILITIES -->
     {page.capabilities && (
       <section class="tp-sec">
-        <div class="tp-srule"><h2 class="tp-kicker">Capabilities</h2><p>{page.capabilities.title}</p></div>
+        <div class="tp-srule"><h2>Capabilities</h2><p>{page.capabilities.title}</p></div>
         <div class="tp-capgrid">
           {page.capabilities.groups.map((g) => (
             <div class="tp-capgroup">
@@ -122,7 +122,7 @@ const catAnchor: Record<string, string> = {
     <!-- SETUP -->
     {page.setup && (
       <section class="tp-sec">
-        <div class="tp-srule"><h2 class="tp-kicker">Set it up</h2></div>
+        <div class="tp-srule"><h2>Set it up</h2></div>
         {page.setup.install && <div class="tp-term">{page.setup.install}</div>}
         {page.setup.env && <p class="tp-body dim">{page.setup.env}</p>}
         {page.setup.config && (
@@ -180,21 +180,27 @@ const catAnchor: Record<string, string> = {
   .tp-aside { min-width: 0; }
 
   .tp-sec { margin-top: 36px; }
-  .tp-srule { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--hairline); padding-bottom: 9px; margin-bottom: 16px; }
-  .tp-kicker { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 0; }
-  .tp-srule p { margin: 0; color: var(--text-dim); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.04em; }
+  .tp-srule { display: flex; align-items: baseline; gap: 13px; border-bottom: 1px solid var(--hairline-strong); padding-bottom: 11px; margin-bottom: 18px; }
+  .tp-srule h2 { font-family: "Outfit", ui-sans-serif, system-ui, sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; color: var(--white); margin: 0; display: inline-flex; align-items: center; gap: 11px; }
+  .tp-srule h2::before { content: ""; width: 4px; height: 17px; border-radius: 2px; background: var(--accent); }
+  .tp-srule p { margin: 0; color: var(--text-muted); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.02em; }
   .tp-body { color: var(--text); max-width: 70ch; }
   .tp-body.dim { color: var(--text-muted); font-size: 13.5px; margin-top: 12px; }
 
-  .tp-session { background: var(--bg-panel); border: 1px solid var(--hairline-strong); border-radius: 11px; overflow: hidden; }
-  .tp-sbar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; border-bottom: 1px solid var(--hairline); }
-  .tp-l { width: 8px; height: 8px; border-radius: 50%; } .tp-l.r { background: #ef4444; } .tp-l.a { background: var(--warn); } .tp-l.g { background: #4ade80; }
-  .tp-st { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-left: 4px; }
-  .tp-sbody { padding: 16px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; line-height: 1.65; }
-  .tp-ask { color: var(--white); } .tp-ask::before { content: "you  "; color: var(--accent-dim); }
-  .tp-call { color: var(--accent); margin: 10px 0 2px; } .tp-call::before { content: "call  "; color: var(--text-dim); }
-  .tp-ret { color: var(--text-muted); white-space: pre-wrap; margin: 0 0 6px; border-left: 2px solid var(--hairline-strong); padding-left: 12px; }
-  .tp-say { color: var(--text); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--hairline-strong); } .tp-say::before { content: "agent  "; color: var(--accent-dim); } .tp-say b { color: var(--white); font-weight: 600; }
+  .tp-session { background: var(--bg-panel); border: 1px solid var(--hairline-strong); border-radius: 12px; overflow: hidden; }
+  .tp-sbar { padding: 11px 18px; border-bottom: 1px solid var(--hairline); }
+  .tp-st { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+  .tp-sbody { padding: 18px; }
+  .tp-ask, .tp-say { font-family: "Instrument Sans", ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  .tp-ask { color: var(--white); }
+  .tp-ask::before, .tp-say::before { display: inline-block; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; margin-right: 10px; vertical-align: 1px; }
+  .tp-ask::before { content: "You"; color: var(--accent); background: rgba(56,189,248,0.10); }
+  .tp-say::before { content: "Agent"; color: #4ade80; background: rgba(74,222,128,0.10); }
+  .tp-call { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--accent); background: #070a10; border: 1px solid var(--hairline); border-radius: 7px; padding: 8px 11px; margin: 12px 0 4px; overflow-x: auto; }
+  .tp-call::before { content: "\2192  "; color: var(--text-dim); }
+  .tp-ret { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--text-muted); white-space: pre-wrap; border-left: 2px solid var(--accent-dim); padding: 3px 0 3px 13px; margin: 0 0 10px; line-height: 1.55; overflow-x: auto; }
+  .tp-say { color: var(--text); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--hairline); }
+  .tp-say b { color: var(--white); font-weight: 600; }
   .tp-caption { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--text-dim); margin-top: 9px; text-align: center; }
 
   .tp-shot { margin: 0; border: 1px solid var(--hairline-strong); border-radius: 11px; overflow: hidden; }
@@ -204,7 +210,7 @@ const catAnchor: Record<string, string> = {
   .tp-capgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .tp-capgroup { border: 1px solid var(--hairline); border-radius: 9px; padding: 13px 15px; background: var(--bg-panel); }
   .tp-caphead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; gap: 8px; }
-  .tp-capname { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--white); }
+  .tp-capname { font-family: "Outfit", ui-sans-serif, system-ui, sans-serif; font-size: 14.5px; font-weight: 600; color: var(--white); }
   .tp-capct { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--accent); white-space: nowrap; }
   .tp-capdesc { color: var(--text-muted); font-size: 12.5px; }
   .tp-capref { display: flex; align-items: center; justify-content: center; border-style: dashed; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--accent); text-decoration: none; }

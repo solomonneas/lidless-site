@@ -51,11 +51,11 @@ const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <Seo siteName={SITE.name} title={title} description={description} keywords={keywords} jsonLd={ld} />
     <link rel="icon" href="/favicon.svg" />
-    <!-- Fonts: Instrument Sans (body) + IBM Plex Mono (labels / wordmark / code) -->
+    <!-- Fonts: Instrument Sans (body) + Outfit (headings/labels) + IBM Plex Mono (code / wordmark) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Outfit:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <Analytics />

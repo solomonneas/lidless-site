@@ -44,13 +44,15 @@ await Promise.all(
 // Section anchors + ordinals per category, matching the nav.
 const CAT_ANCHOR: Record<string, string> = {
   'Security / SOC': 'security',
+  'Threat Intelligence & OSINT': 'intel',
   Network: 'network',
   Homelab: 'homelab',
 };
 const CAT_NUM: Record<string, string> = {
   'Security / SOC': '01',
-  Network: '02',
-  Homelab: '03',
+  'Threat Intelligence & OSINT': '02',
+  Network: '03',
+  Homelab: '04',
 };
 ---
 <BaseLayout title={SITE.seoTitle} description={SITE.metaDescription} jsonLd={jsonLd}>

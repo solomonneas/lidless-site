@@ -9,7 +9,7 @@
 export type Lifecycle = 'Active' | 'WIP' | 'Experimental';
 
 /** Top-level grouping for the filterable card grid. */
-export type Category = 'Security / SOC' | 'Network' | 'Homelab';
+export type Category = 'Security / SOC' | 'Threat Intelligence & OSINT' | 'Network' | 'Homelab';
 
 export interface Tool {
   /** Display name, e.g. "wazuh-mcp". */
@@ -109,27 +109,27 @@ export const TOOLS: Tool[] = [
   {
     name: 'maltego-mcp',
     slug: 'maltego-mcp',
-    oneLiner: 'Maltego Desktop OSINT integration.',
+    oneLiner: 'Let your agent author Maltego .mtgx graphs and run whois, DNS, ASN, and crt.sh lookups.',
     lifecycle: 'Active',
-    category: 'Security / SOC',
+    category: 'Threat Intelligence & OSINT',
     repo: `${SOLO_GH}/maltego-mcp`,
     npm: 'maltego-mcp',
   },
   {
     name: 'cyberbrief',
     slug: 'cyberbrief',
-    oneLiner: 'AI cyber threat-intel research and reporting.',
+    oneLiner: 'AI threat-intel briefings: BLUF reports, ATT&CK mapping, and IOC extraction.',
     lifecycle: 'Active',
-    category: 'Security / SOC',
+    category: 'Threat Intelligence & OSINT',
     repo: `${SOLO_GH}/cyberbrief`,
     npm: null,
   },
   {
     name: 'intel-workbench',
     slug: 'intel-workbench',
-    oneLiner: 'Structured analytic techniques for CTI.',
+    oneLiner: 'Browser-native ACH workbench: ATT&CK tagging, ICD 203 confidence, local-only.',
     lifecycle: 'Active',
-    category: 'Security / SOC',
+    category: 'Threat Intelligence & OSINT',
     repo: `${SOLO_GH}/intel-workbench`,
     // Offline-first React SPA (private package, not published). Run from source.
     npm: null,
@@ -216,9 +216,9 @@ export const TOOLS: Tool[] = [
   {
     name: 'soc-stack',
     slug: 'soc-stack',
-    oneLiner: 'One-command SOC lab on Proxmox.',
+    oneLiner: 'One command stands up a full SOC on Proxmox: Wazuh, TheHive, Cortex, MISP, Zeek, Suricata.',
     lifecycle: 'Active',
-    category: 'Homelab',
+    category: 'Security / SOC',
     repo: `${SOLO_GH}/soc-stack`,
     npm: null,
   },
@@ -244,9 +244,9 @@ export const TOOLS: Tool[] = [
     name: 'vervet',
     slug: 'vervet',
     oneLiner:
-      'Network threat hunting for Zeek and Suricata logs. Explainable per-host risk scoring with evidence chains and MITRE ATT&CK mapping.',
+      'Threat hunting for Zeek and Suricata logs: explainable per-host risk with ATT&CK evidence chains.',
     lifecycle: 'Active',
-    category: 'Security / SOC',
+    category: 'Threat Intelligence & OSINT',
     repo: `${GH}/vervet`,
     npm: null,
     href: 'https://vervet.dev',
@@ -285,7 +285,7 @@ export const TOOLS: Tool[] = [
 ];
 
 /** Category order for rendering the grid groups. */
-export const CATEGORY_ORDER: Category[] = ['Security / SOC', 'Network', 'Homelab'];
+export const CATEGORY_ORDER: Category[] = ['Security / SOC', 'Threat Intelligence & OSINT', 'Network', 'Homelab'];
 
 /** Slugs that have a local /<slug> page (external-home tools excluded), for the sitemap and link checks. */
 export const TOOL_SLUGS: string[] = TOOLS.filter((t) => !t.href).map((t) => t.slug);

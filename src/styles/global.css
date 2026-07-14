@@ -134,13 +134,17 @@ a { color: inherit; }
     0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* ---------------------------------------------------------------- catalog: three parallel watch-lists */
+/* ---------------------------------------------------------------- catalog: four parallel watch-lists */
 .columns {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.25rem;
+  align-items: start;
 }
-@media (max-width: 900px) {
+@media (max-width: 1080px) {
+  .columns { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
+}
+@media (max-width: 640px) {
   .columns { grid-template-columns: 1fr; gap: 2.75rem; }
 }
 

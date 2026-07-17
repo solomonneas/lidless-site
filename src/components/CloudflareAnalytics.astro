@@ -1,0 +1,12 @@
+---
+const token = import.meta.env.PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN;
+const isPreview = import.meta.env.VERCEL_ENV === 'preview';
+const shouldRender = import.meta.env.PROD && !isPreview && token;
+---
+{shouldRender && (
+  <script
+    defer
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon={JSON.stringify({ token })}
+  />
+)}

@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Analytics from '@vercel/analytics/astro';
+import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
 import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import Seo from '../components/Seo.astro';
@@ -59,6 +60,7 @@ const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
       rel="stylesheet"
     />
     <Analytics />
+    <CloudflareAnalytics />
   </head>
   <body>
     <SiteNav />

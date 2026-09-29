@@ -5,6 +5,7 @@ import { getReleasePosts } from '../lib/releases.ts';
 import { CATEGORY_ORDER } from '../lib/tools.ts';
 import { SITE } from '../lib/site.ts';
 import { graph, breadcrumbLd, canonicalFor } from '../lib/seo.ts';
+import { releaseAnchor } from '../lib/releases.ts';
 
 const posts = await getReleasePosts();
 
@@ -40,7 +41,7 @@ const fmt = (iso: string) =>
 ---
 <BaseLayout title="The Log" description={description} jsonLd={jsonLd}>
   <main class="px-6 md:px-10 py-16 max-w-4xl mx-auto">
-    <div class="section-rule"><h2 class="kicker m-0">THE LOG</h2></div>
+    <div class="section-rule"><h1 class="kicker m-0">THE LOG</h1></div>
     <p class="max-w-2xl mt-7" style="color: var(--text-muted);">
       Every release across the Lidless tools, newest first. Cut from each tool's GitHub releases.
       <a href="/blog/rss.xml" style="color: var(--accent);">RSS</a>.
@@ -66,8 +67,8 @@ const fmt = (iso: string) =>
         <li class="log-post" data-category={slugify(p.category)}>
           <p class="font-mono log-date">{fmt(p.date)}</p>
           <div class="log-head">
-            <a href={`/blog/${p.slug}`} class="log-title">{p.tool}</a>
-            <span class="log-ver font-mono">v{p.version}</span>
+            <a href={`/changelog/${p.toolSlug}#${releaseAnchor(p.version)}`} class="log-title">{p.tool}</a>
+            <a href={`/blog/${p.slug}`} class="log-ver font-mono">v{p.version}</a>
             <span class="log-cat font-mono">{p.category}</span>
           </div>
           {p.name && p.name !== p.tag && <p class="log-name">{p.name}</p>}
@@ -111,7 +112,8 @@ const fmt = (iso: string) =>
     .log-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; margin-top: 0.3rem; }
     .log-title { font-size: 1.15rem; font-weight: 600; color: var(--white); text-decoration: none; }
     .log-title:hover { color: var(--accent); }
-    .log-ver { font-size: 0.72rem; color: var(--accent); border: 1px solid var(--hairline-strong); border-radius: 4px; padding: 0.05rem 0.4rem; }
+    .log-ver { font-size: 0.72rem; color: var(--accent); border: 1px solid var(--hairline-strong); border-radius: 4px; padding: 0.05rem 0.4rem; text-decoration: none; }
+    .log-ver:hover { text-decoration: underline; }
     .log-cat { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
     .log-name { margin: 0.35rem 0 0; color: var(--text-muted); font-size: 0.95rem; }
   </style>

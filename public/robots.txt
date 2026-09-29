@@ -1,4 +1,7 @@
+# Lidless welcomes all machine readers: search engines, AI search, assistant
+# fetches, and AI training crawlers are all welcome across the whole site.
 User-agent: *
 Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 
 Sitemap: https://lidless.dev/sitemap.xml

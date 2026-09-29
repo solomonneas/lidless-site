@@ -2,7 +2,7 @@
 import { marked } from 'marked';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { JalcoProjectBadgesStatic } from '../../components/JalcoProjectBadgesStatic';
-import { getReleasePosts, type ReleasePost } from '../../lib/releases.ts';
+import { getReleasePosts, releaseAnchor, type ReleasePost } from '../../lib/releases.ts';
 import { fetchLatestRelease, fetchCIStatus } from '../../lib/github-data.ts';
 import { SITE } from '../../lib/site.ts';
 import { graph, breadcrumbLd, canonicalFor } from '../../lib/seo.ts';
@@ -67,7 +67,7 @@ const jsonLd = graph([
 const fmt = (iso: string) =>
   new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
-<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+<BaseLayout title={title} description={description} jsonLd={jsonLd} robots="noindex, follow">
   <main class="px-6 md:px-10 py-14 max-w-3xl mx-auto">
     <nav class="text-sm mb-6"><a href="/blog" style="color: var(--text-muted);">&larr; The Log</a></nav>
 
@@ -102,7 +102,8 @@ const fmt = (iso: string) =>
     </div>
 
     <p class="mt-10 text-sm" style="color: var(--text-muted);">
-      <a href={post.url} style="color: var(--accent);">View {post.tag} on GitHub</a>
+      <a href={`/changelog/${post.toolSlug}#${releaseAnchor(post.version)}`} style="color: var(--accent);">Full changelog</a>
+      &middot; <a href={post.url} style="color: var(--accent);">View {post.tag} on GitHub</a>
       &middot; <a href="/blog" style="color: var(--accent);">All releases</a>
     </p>
   </main>

@@ -15,7 +15,7 @@ const page = PAGES[slug!]!;
 const { name, lifecycle, category, repo, npm } = tool;
 
 const pageUrl = `https://lidless.dev/${slug}`;
-const title = `${name} - ${page.value.split(/[.:]/)[0].trim().toLowerCase()}`.slice(0, 68);
+const title = name;
 const description = page.value.replace(/\s+/g, ' ').slice(0, 155);
 const jsonLd = graph([
   organizationLd(),
@@ -61,6 +61,7 @@ const catAnchor: Record<string, string> = {
             {page.meta.map((m) => <span class="tp-tag">{m}</span>)}
           </div>
         )}
+        <p class="tp-changelog"><a href={`/changelog/${slug}`}>Full changelog &rarr;</a></p>
       </div>
       <aside class="tp-aside"><ToolStatus slug={slug} /></aside>
     </header>
@@ -175,6 +176,9 @@ const catAnchor: Record<string, string> = {
   .tp-btn.p { background: var(--accent); color: #061320; font-weight: 600; }
   .tp-btn.g { border: 1px solid var(--hairline-strong); color: var(--text); }
   .tp-btn.g:hover { border-color: var(--accent-dim); }
+  .tp-changelog { margin: 14px 0 0; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; }
+  .tp-changelog a { color: var(--accent); text-decoration: none; }
+  .tp-changelog a:hover { text-decoration: underline; }
   .tp-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
   .tp-tag { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--text-muted); background: var(--bg-panel-2); border: 1px solid var(--hairline-strong); border-radius: 6px; padding: 4px 9px; }
   .tp-aside { min-width: 0; }

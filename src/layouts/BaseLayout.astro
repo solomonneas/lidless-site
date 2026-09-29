@@ -6,7 +6,7 @@ import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import Seo from '../components/Seo.astro';
 import { SITE } from '../lib/site.ts';
-import { composeTitle, organizationLd, websiteLd, graph } from '../lib/seo.ts';
+import { organizationLd, websiteLd, graph } from '../lib/seo.ts';
 
 interface Props {
   title?: string;
@@ -14,12 +14,20 @@ interface Props {
   /** Page-specific JSON-LD. Defaults to the site-level Organization + WebSite graph. */
   jsonLd?: object | object[];
   keywords?: string[];
+  /**
+   * Raw robots directive (e.g. "noindex, follow"). Rendered as an extra meta
+   * tag after <Seo/> (which emits "index, follow" by default); crawlers apply
+   * the union, so "index, follow" + "noindex, follow" reads as noindex,follow.
+   * Seo.astro is fleet-owned, so this override lives here at the call site.
+   */
+  robots?: string;
 }
 
 const {
   title: pageTitle,
   description = SITE.metaDescription ?? SITE.description,
   jsonLd,
+  robots,
   keywords = [
     'Lidless',
     'security tooling',
@@ -41,7 +49,16 @@ const {
   ],
 } = Astro.props as Props;
 
-const title = composeTitle(pageTitle, SITE.seoTitle);
+// Inner pages use "<page title> - Lidless"; the suffix is dropped when the
+// result would exceed 60 chars (a bare long page title stays as-is). Home
+// keeps the full seoTitle.
+function shortTitle(pageTitle: string | undefined): string {
+  if (!pageTitle || pageTitle === SITE.seoTitle) return SITE.seoTitle;
+  const full = `${pageTitle} - Lidless`;
+  return full.length > 60 ? pageTitle : full;
+}
+
+const title = shortTitle(pageTitle);
 // Default page graph: who we are (Organization) + this site (WebSite).
 const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
 ---
@@ -51,6 +68,7 @@ const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <Seo siteName={SITE.name} title={title} description={description} keywords={keywords} jsonLd={ld} />
+    {robots && <meta name="robots" content={robots} />}
     <link rel="icon" href="/favicon.svg" />
     <!-- Fonts: Instrument Sans (body) + IBM Plex Mono (labels / wordmark / code) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

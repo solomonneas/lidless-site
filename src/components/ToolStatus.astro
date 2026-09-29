@@ -1,21 +1,10 @@
 ---
-// Live project status for a tool page: a jal-co repo card (stars, language,
-// topics, license, last-updated) plus latest release + CI badge and a small
-// commit graph of recent activity, pulled from GitHub at build time. Renders
-// nothing when there is no data (unreleased tool, no CI, rate limit), so it is
-// safe to drop onto every tool page. A trust signal for a security catalog:
-// each page shows the tool is real, released, green, and moving.
+// Compact live status for a tool page: a small watch-status panel pulled from
+// GitHub at build time (CI, latest release, stars, language, last activity,
+// license). Renders nothing when there is no data (unreleased tool, rate limit).
 import { TOOLS } from '../lib/tools.ts';
 import { parseRepo } from '../lib/releases.ts';
-import { JalcoProjectBadgesStatic } from './JalcoProjectBadgesStatic';
-import { JalcoRepoCardStatic, type RepoAction } from './JalcoRepoCardStatic';
-import { CommitGraph } from './commit-graph';
-import {
-  fetchLatestRelease,
-  fetchCIStatus,
-  fetchRecentCommits,
-  fetchGitHubRepoData,
-} from '../lib/github-data.ts';
+import { fetchLatestRelease, fetchCIStatus, fetchGitHubRepoData, formatRelativeDate } from '../lib/github-data.ts';
 
 interface Props {
   slug: string;
@@ -25,75 +14,63 @@ const { slug } = Astro.props;
 const tool = TOOLS.find((t) => t.slug === slug);
 const parsed = tool ? parseRepo(tool.repo) : null;
 
-const [repoData, release, ci, commits] = parsed
+const [repoData, release, ci] = parsed
   ? await Promise.all([
       fetchGitHubRepoData(parsed.owner, parsed.repo),
       fetchLatestRelease(parsed.owner, parsed.repo),
       fetchCIStatus(parsed.owner, parsed.repo),
-      fetchRecentCommits(parsed.owner, parsed.repo, 6),
     ])
-  : [null, null, null, []];
+  : [null, null, null];
 
-// Card actions complement the hero CTAs: send people to the commits, the
-// readme, npm (when published), and the star page.
-const repoBase = parsed ? `https://github.com/${parsed.owner}/${parsed.repo}` : tool?.repo ?? '';
-const actions: RepoAction[] = [];
-if (repoBase) {
-  actions.push({ href: `${repoBase}/commits`, label: 'Commits', kind: 'commits' });
-  actions.push({ href: `${repoBase}#readme`, label: 'README', kind: 'readme' });
-}
-if (tool?.npm) {
-  actions.push({ href: `https://www.npmjs.com/package/${tool.npm}`, label: 'npm', kind: 'npm' });
-}
-if (repoBase) actions.push({ href: `${repoBase}/stargazers`, label: 'Star', kind: 'stars' });
+const repoUrl = parsed ? `https://github.com/${parsed.owner}/${parsed.repo}` : tool?.repo ?? '';
+const semver = release?.tag?.match(/\d+\.\d+\.\d+/);
+const version = semver ? `v${semver[0]}` : release?.tag ?? null;
+const ciLabel =
+  ci?.status === 'success' ? 'passing' : ci?.status === 'failure' ? 'failing' : ci?.status ?? null;
 
-const show = Boolean(repoData || release || ci || commits.length > 0);
+type Row = { k: string; v: string; cls?: string };
+const rows: Row[] = [];
+if (ciLabel) rows.push({ k: 'ci', v: ciLabel, cls: ci?.status === 'success' ? 'ok' : ci?.status === 'failure' ? 'bad' : '' });
+if (version) rows.push({ k: 'latest', v: release?.publishedAt ? `${version} · ${formatRelativeDate(release.publishedAt)}` : version });
+if (repoData?.stars != null) rows.push({ k: 'stars', v: String(repoData.stars) });
+if (repoData?.language) rows.push({ k: 'language', v: repoData.language });
+if (repoData?.updatedAt) rows.push({ k: 'updated', v: formatRelativeDate(repoData.updatedAt) });
+if (repoData?.license) rows.push({ k: 'license', v: repoData.license });
+
+const show = rows.length > 0;
 ---
 {show && (
-  <section class="tool-status mb-10">
-    <div class="section-rule"><h2 class="kicker m-0">LIVE STATUS</h2></div>
-
-    {repoData && tool && parsed && (
-      <div class="repo-card-block mt-6">
-        <JalcoRepoCardStatic
-          repoSlug={`${parsed.owner}/${parsed.repo}`}
-          label="Open Source"
-          desc={tool.oneLiner}
-          data={repoData}
-          actions={actions}
-        />
-      </div>
-    )}
-
-    {(release || ci) && (
-      <div class="mt-6">
-        <JalcoProjectBadgesStatic release={release} ci={ci} />
-      </div>
-    )}
-    {commits.length > 0 && (
-      <div class="commit-graph-block mt-6">
-        <CommitGraph client:idle commits={commits} className="tool-commit-graph" />
-      </div>
-    )}
-    <p class="status-note font-mono mt-4">Live from GitHub: stars, latest release, CI, and recent commits.</p>
-  </section>
+  <aside class="tstat" aria-label="Live project status">
+    <div class="tstat-bar">
+      <span class="tstat-leds"><span class="led r"></span><span class="led a"></span><span class="led g"></span></span>
+      <span class="tstat-title">Watch status</span>
+    </div>
+    <div class="tstat-rows">
+      {rows.map((r) => (
+        <div class="tstat-row"><span class="tstat-k">{r.k}</span><span class={`tstat-v ${r.cls ?? ''}`}>{r.v}</span></div>
+      ))}
+    </div>
+    <div class="tstat-foot">
+      <a href={`${repoUrl}/commits`} rel="noopener">commits &rarr;</a>
+      <a href={repoUrl} rel="noopener">repo &rarr;</a>
+    </div>
+  </aside>
 )}
 
 <style>
-  .repo-card-block :global(.jalco-repo-card) {
-    border-left: 3px solid var(--accent);
-    background: var(--bg-panel);
-  }
-  .repo-card-block :global(a[data-slot="repo-action-link"]:hover) {
-    transform: translateY(-1px);
-  }
-  .commit-graph-block {
-    border: 1px solid var(--hairline);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    background: var(--bg-panel);
-    overflow-x: auto;
-  }
-  .commit-graph-block :global(.tool-commit-graph) { border-radius: 6px; }
-  .status-note { font-size: 0.72rem; color: var(--text-dim); }
+  .tstat { background: var(--bg-panel); border: 1px solid var(--hairline-strong); border-radius: 10px; overflow: hidden; }
+  .tstat-bar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border-bottom: 1px solid var(--hairline); }
+  .tstat-leds { display: inline-flex; gap: 5px; }
+  .tstat-leds .led { width: 8px; height: 8px; border-radius: 50%; }
+  .led.r { background: var(--danger); } .led.a { background: var(--warn); } .led.g { background: #4ade80; }
+  .tstat-title { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+  .tstat-rows { padding: 6px 13px; }
+  .tstat-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 5px 0; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px; }
+  .tstat-k { color: var(--text-dim); }
+  .tstat-v { color: var(--text); text-align: right; }
+  .tstat-v.ok { color: #4ade80; }
+  .tstat-v.bad { color: var(--danger); }
+  .tstat-foot { display: flex; gap: 16px; padding: 10px 13px; border-top: 1px solid var(--hairline); font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11.5px; }
+  .tstat-foot a { color: var(--accent); text-decoration: none; }
+  .tstat-foot a:hover { text-decoration: underline; }
 </style>

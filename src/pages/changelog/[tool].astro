@@ -1,0 +1,125 @@
+---
+import { marked } from 'marked';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { TOOLS, TOOL_SLUGS } from '../../lib/tools.ts';
+import { getReleasePosts, releaseAnchor, type ReleasePost } from '../../lib/releases.ts';
+import { SITE } from '../../lib/site.ts';
+import { graph, breadcrumbLd, canonicalFor } from '../../lib/seo.ts';
+
+// One page per tool with releases, newest first. Tools without any fetched
+// releases still render (empty state) so the route set is stable when the
+// build runs without GITHUB_TOKEN.
+export async function getStaticPaths() {
+  const posts = await getReleasePosts();
+  const byTool = new Map<string, ReleasePost[]>();
+  for (const p of posts) {
+    const arr = byTool.get(p.toolSlug) ?? [];
+    arr.push(p);
+    byTool.set(p.toolSlug, arr);
+  }
+  return TOOL_SLUGS.map((toolSlug) => ({
+    params: { tool: toolSlug },
+    props: { releases: byTool.get(toolSlug) ?? [] },
+  }));
+}
+
+const { tool } = Astro.params;
+const { releases } = Astro.props as { releases: ReleasePost[] };
+const meta = TOOLS.find((t) => t.slug === tool)!;
+
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString();
+const canonical = canonicalFor(siteUrl, Astro.url.pathname);
+const title = `${meta.name} changelog`;
+const summary =
+  releases.length > 0
+    ? `Every ${meta.name} release in one place, newest first (${releases.length} release${releases.length === 1 ? '' : 's'}).`
+    : `${meta.name} release history, newest first.`;
+// Pad the thin release count with the tool's one-liner, capped at 160 chars.
+const fullDescription = `${summary} ${meta.oneLiner}`;
+const description =
+  fullDescription.length > 160 ? `${fullDescription.slice(0, 157).replace(/\s+\S*$/, '')}...` : fullDescription;
+
+const jsonLd = graph([
+  {
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: canonical,
+  },
+  breadcrumbLd([
+    { name: 'Lidless', url: 'https://lidless.dev' },
+    { name: meta.name, url: `https://lidless.dev/${meta.slug}` },
+    { name: 'Changelog', url: canonical },
+  ]),
+]);
+
+const fmt = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+
+const rendered = await Promise.all(
+  releases.map(async (r) => ({ release: r, html: r.body ? await marked.parse(r.body) : '' })),
+);
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd} robots={releases.length === 0 ? 'noindex, follow' : undefined}>
+  <main class="px-6 md:px-10 py-14 max-w-3xl mx-auto">
+    <nav class="text-sm mb-6">
+      <a href={`/${meta.slug}`} style="color: var(--text-muted);">&larr; {meta.name}</a>
+      <span style="color: var(--text-dim);"> &middot; </span>
+      <a href="/blog" style="color: var(--text-muted);">The Log</a>
+    </nav>
+
+    <p class="kicker m-0">CHANGELOG</p>
+    <h1 class="mt-2 text-3xl font-bold" style="color: var(--white);">{meta.name} changelog</h1>
+    <p class="mt-3" style="color: var(--text-muted);">
+      Every {meta.name} release, newest first.
+      <a href={meta.repo} style="color: var(--accent);">GitHub repo &rarr;</a>
+    </p>
+
+    {rendered.length === 0 && (
+      <p class="mt-10" style="color: var(--text-muted);">
+        No releases found for {meta.name} in this build. See the
+        <a href={meta.repo} style="color: var(--accent);"> releases on GitHub</a>.
+      </p>
+    )}
+
+    {rendered.map(({ release, html }) => (
+      <section class="mt-12" aria-labelledby={releaseAnchor(release.version)}>
+        <h2 id={releaseAnchor(release.version)} class="text-xl font-semibold" style="color: var(--white);">
+          {release.tag}
+          <span class="font-mono text-sm font-normal" style="color: var(--text-dim);"> &middot; {fmt(release.date)}</span>
+        </h2>
+        {html ? (
+          <article class="release-body mt-4" set:html={html} />
+        ) : (
+          <p class="mt-4" style="color: var(--text-muted);">
+            No release notes were attached to {release.tag}. See the
+            <a href={release.url} style="color: var(--accent);">release on GitHub</a>.
+          </p>
+        )}
+        <p class="mt-4 text-sm" style="color: var(--text-muted);">
+          <a href={`/blog/${release.slug}`} style="color: var(--accent);">Permalink</a>
+          <span style="color: var(--text-dim);"> &middot; </span>
+          <a href={release.url} style="color: var(--accent);">GitHub</a>
+        </p>
+      </section>
+    ))}
+  </main>
+
+  <style>
+    .release-body { color: var(--text); line-height: 1.7; }
+    .release-body :global(h1),
+    .release-body :global(h2),
+    .release-body :global(h3) { color: var(--white); font-weight: 600; margin: 1.6rem 0 0.6rem; line-height: 1.25; }
+    .release-body :global(h2) { font-size: 1.2rem; }
+    .release-body :global(h3) { font-size: 1.02rem; }
+    .release-body :global(p) { margin: 0.7rem 0; color: var(--text-muted); }
+    .release-body :global(ul),
+    .release-body :global(ol) { margin: 0.7rem 0; padding-left: 1.3rem; color: var(--text-muted); }
+    .release-body :global(li) { margin: 0.3rem 0; }
+    .release-body :global(a) { color: var(--accent); }
+    .release-body :global(code) { font-family: 'IBM Plex Mono', monospace; font-size: 0.85em; color: var(--accent); background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 4px; padding: 0.08em 0.35em; }
+    .release-body :global(pre) { background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 1rem 0; }
+    .release-body :global(pre code) { background: none; border: 0; padding: 0; color: var(--text); }
+    .release-body :global(hr) { border: 0; border-top: 1px solid var(--hairline); margin: 1.5rem 0; }
+  </style>
+</BaseLayout>

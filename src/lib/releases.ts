@@ -29,6 +29,15 @@ export interface ReleasePost {
   repo: string;
 }
 
+/** Anchor id for a release on its tool changelog page, e.g. "1.2.0" -> "v1-2-0". */
+export function releaseAnchor(version: string): string {
+  const slug = version
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `v${slug}`;
+}
+
 /** Pull owner + repo out of a GitHub repo URL. */
 export function parseRepo(repoUrl: string): { owner: string; repo: string } | null {
   const m = repoUrl.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git|\/|$)/);

@@ -1,9 +1,8 @@
 ---
 import { marked } from 'marked';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { JalcoProjectBadgesStatic } from '../../components/JalcoProjectBadgesStatic';
 import { getReleasePosts, releaseAnchor, type ReleasePost } from '../../lib/releases.ts';
-import { fetchLatestRelease, fetchCIStatus } from '../../lib/github-data.ts';
+import { PAGES } from '../../lib/tool-pages.ts';
 import { SITE } from '../../lib/site.ts';
 import { graph, breadcrumbLd, canonicalFor } from '../../lib/seo.ts';
 
@@ -36,9 +35,6 @@ const { post, prev, next } = Astro.props as {
   next: ReleasePost | null;
 };
 
-const [owner, repo] = post.repo.split('/');
-const release = await fetchLatestRelease(owner, repo);
-const ci = await fetchCIStatus(owner, repo);
 
 const bodyHtml = post.body ? await marked.parse(post.body) : '';
 
@@ -65,72 +61,51 @@ const jsonLd = graph([
 ]);
 
 const fmt = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+  new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+const hasPage = Boolean(PAGES[post.toolSlug]);
+const words = post.body.trim().split(/\s+/).filter(Boolean).length;
 ---
 <BaseLayout title={title} description={description} jsonLd={jsonLd} robots="noindex, follow">
-  <main class="px-6 md:px-10 py-14 max-w-3xl mx-auto">
-    <nav class="text-sm mb-6"><a href="/blog" style="color: var(--text-muted);">&larr; The Log</a></nav>
+  <main>
+    <header class="phead">
+      <div class="wrap"><div class="frame">
+        <nav class="crumb" aria-label="Breadcrumb">
+          <a href="/">Lidless Labs</a> / <a href="/blog">Changelog</a> / <a href={`/changelog/${post.toolSlug}`}>{post.tool}</a> / <span>{post.tag}</span>
+        </nav>
+        <h1><span class="mono">{post.tool}</span> <span class="ver">{post.tag}</span></h1>
+        <div class="meta mono">
+          <span>{fmt(post.date)}</span><span>{post.category}</span><a href={`https://github.com/${post.repo}`}>{post.repo}</a>
+        </div>
+        <div class="actions">
+          {hasPage && <a class="btn solid" href={`/${post.toolSlug}`}>About {post.tool} &rarr;</a>}
+          <a class="btn" href={`/changelog/${post.toolSlug}#${releaseAnchor(post.version)}`}>Full changelog</a>
+          <a class="btn" href={post.url} rel="noopener">Release on GitHub &#8599;</a>
+        </div>
+      </div></div>
+    </header>
 
-    <p class="kicker m-0">RELEASE</p>
-    <div class="post-title-row mt-2">
-      <h1 class="post-title">{post.tool}</h1>
-      <span class="post-ver font-mono">{post.tag}</span>
+    <div class="wrap">
+      <section class="sec">
+        <h2 class="label">Release notes{bodyHtml && <small>{words} words</small>}</h2>
+        {bodyHtml ? (
+          <article class="prose" set:html={bodyHtml} />
+        ) : (
+          <p class="empty-note">No written notes for {post.tag}. The diff is on <a href={post.url}>GitHub</a>.</p>
+        )}
+      </section>
+
+      <nav class="pager" aria-label={`Other ${post.tool} releases`}>
+        {prev ? <a href={`/blog/${prev.slug}`}><div class="l">&larr; older</div><div class="t">{prev.tag}</div></a> : <span></span>}
+        {next ? <a href={`/blog/${next.slug}`}><div class="l">newer &rarr;</div><div class="t">{next.tag}</div></a> : <span></span>}
+      </nav>
     </div>
-    <p class="font-mono post-meta mt-3">
-      {fmt(post.date)} &middot; <a href={`/${post.toolSlug}`} style="color: var(--accent);">{post.tool}</a>
-      &middot; <span style="color: var(--text-dim);">{post.category}</span>
-    </p>
-
-    {(release || ci) && (
-      <div class="mt-5">
-        <JalcoProjectBadgesStatic release={release} ci={ci} />
-      </div>
-    )}
-
-    <article class="release-body mt-9" set:html={bodyHtml} />
-    {!bodyHtml && (
-      <p class="release-body mt-9" style="color: var(--text-muted);">
-        No release notes were attached to {post.tag}. See the
-        <a href={post.url} style="color: var(--accent);">release on GitHub</a>.
-      </p>
-    )}
-
-    <div class="post-nav mt-12">
-      {prev && <a class="pn" href={`/blog/${prev.slug}`}>&larr; {prev.tool} {prev.tag}</a>}
-      <span class="flex-1"></span>
-      {next && <a class="pn" href={`/blog/${next.slug}`}>{next.tool} {next.tag} &rarr;</a>}
-    </div>
-
-    <p class="mt-10 text-sm" style="color: var(--text-muted);">
-      <a href={`/changelog/${post.toolSlug}#${releaseAnchor(post.version)}`} style="color: var(--accent);">Full changelog</a>
-      &middot; <a href={post.url} style="color: var(--accent);">View {post.tag} on GitHub</a>
-      &middot; <a href="/blog" style="color: var(--accent);">All releases</a>
-    </p>
   </main>
 
   <style>
-    .post-title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.8rem; }
-    .post-title { font-size: 2rem; font-weight: 700; color: var(--white); line-height: 1.1; margin: 0; }
-    .post-ver { font-size: 0.85rem; color: var(--accent); border: 1px solid var(--hairline-strong); border-radius: 5px; padding: 0.15rem 0.5rem; }
-    .post-meta { font-size: 0.78rem; color: var(--text-dim); margin: 0; }
-    .post-nav { display: flex; align-items: center; gap: 1rem; border-top: 1px solid var(--hairline); padding-top: 1.4rem; }
-    .pn { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; color: var(--text-muted); text-decoration: none; }
-    .pn:hover { color: var(--accent); }
-
-    .release-body { color: var(--text); line-height: 1.7; }
-    .release-body :global(h1),
-    .release-body :global(h2),
-    .release-body :global(h3) { color: var(--white); font-weight: 600; margin: 1.6rem 0 0.6rem; line-height: 1.25; }
-    .release-body :global(h2) { font-size: 1.2rem; }
-    .release-body :global(h3) { font-size: 1.02rem; }
-    .release-body :global(p) { margin: 0.7rem 0; color: var(--text-muted); }
-    .release-body :global(ul),
-    .release-body :global(ol) { margin: 0.7rem 0; padding-left: 1.3rem; color: var(--text-muted); }
-    .release-body :global(li) { margin: 0.3rem 0; }
-    .release-body :global(a) { color: var(--accent); }
-    .release-body :global(code) { font-family: 'IBM Plex Mono', monospace; font-size: 0.85em; color: var(--accent); background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 4px; padding: 0.08em 0.35em; }
-    .release-body :global(pre) { background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 1rem 0; }
-    .release-body :global(pre code) { background: none; border: 0; padding: 0; color: var(--text); }
-    .release-body :global(hr) { border: 0; border-top: 1px solid var(--hairline); margin: 1.5rem 0; }
+    .ver { color: var(--text-dim); font-weight: 500; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-size: 13px; color: var(--text-dim); }
+    .meta a { color: var(--text-muted); }
+    .meta a:hover { color: var(--text); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
   </style>
 </BaseLayout>

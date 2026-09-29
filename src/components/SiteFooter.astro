@@ -1,16 +1,24 @@
 ---
 import { SITE, EXTERNAL } from '../lib/site.ts';
 ---
-<footer class="px-6 md:px-10 py-10 border-t mt-20 text-sm" style="border-color: var(--hairline); color: var(--text-muted);">
-  <div class="flex flex-wrap gap-6 items-center">
-    <span class="font-mono font-medium" style="color: var(--text);">LIDLESS<span style="color: var(--accent);">_</span></span>
-    <a href="/#security">Security / SOC</a>
-    <a href="/#intel">Threat Intel</a>
-    <a href="/#network">Network</a>
-    <a href="/#homelab">Homelab</a>
-    <a href={EXTERNAL.github}>GitHub</a>
-    <span class="flex-1"></span>
-    <span class="font-mono" style="color: var(--accent);">{SITE.motto}</span>
-    <span class="font-mono">{SITE.version}</span>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>&copy; {new Date().getFullYear()} {SITE.formalName}</span>
+    <nav aria-label="Footer">
+      <a href="/#tools">Tools</a>
+      <a href="/blog">Changelog</a>
+      <a href="/docs">Docs</a>
+      <a href="/blog/rss.xml">RSS</a>
+      <a href={EXTERNAL.github}>GitHub</a>
+    </nav>
+    <span class="mono motto">{SITE.motto.toLowerCase().replace(/\.$/, '')}</span>
   </div>
 </footer>
+
+<style>
+  .site-footer { border-top: 1px solid var(--hairline); padding: 28px 0; font-size: 13px; color: var(--text-dim); }
+  .site-footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  .site-footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
+  .site-footer nav a:hover { color: var(--text); }
+  .motto { margin-left: auto; }
+</style>

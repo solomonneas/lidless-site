@@ -1,0 +1,231 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../lib/site.ts';
+import { graph, breadcrumbLd, canonicalFor } from '../lib/seo.ts';
+
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString();
+const canonical = canonicalFor(siteUrl, Astro.url.pathname);
+const description =
+  'How every Lidless tool installs, connects to an AI client, handles credentials, and gates writes. The shared setup for all Lidless MCP servers and CLIs.';
+const jsonLd = graph([
+  { '@type': 'TechArticle', headline: 'Lidless Labs docs', description, url: canonical },
+  breadcrumbLd([
+    { name: 'Lidless', url: 'https://lidless.dev' },
+    { name: 'Docs', url: canonical },
+  ]),
+]);
+
+const env = '        "SYSTEM_URL": "https://system.example.net",\n        "SYSTEM_API_KEY": "..."';
+const json = `{\n  "mcpServers": {\n    "<name>": {\n      "command": "npx",\n      "args": ["-y", "<tool>"],\n      "env": {\n${env}\n      }\n    }\n  }\n}`;
+const CLIENTS = [
+  {
+    name: 'Claude Code',
+    path: 'run once in your shell; add --scope user to use it in every project',
+    cfg: 'claude mcp add <name> \\\n  -e SYSTEM_URL=https://system.example.net \\\n  -e SYSTEM_API_KEY=... \\\n  -- npx -y <tool>',
+  },
+  { name: 'Claude Desktop', path: 'claude_desktop_config.json (Settings > Developer > Edit Config)', cfg: json },
+  {
+    name: 'Codex',
+    path: '~/.codex/config.toml',
+    cfg: '[mcp_servers.<name>]\ncommand = "npx"\nargs = ["-y", "<tool>"]\n\n[mcp_servers.<name>.env]\nSYSTEM_URL = "https://system.example.net"\nSYSTEM_API_KEY = "..."',
+  },
+  { name: 'Cursor', path: '~/.cursor/mcp.json, or .cursor/mcp.json inside a project', cfg: json },
+  { name: 'Other', path: 'any MCP client: a stdio server with this command, args, and env', cfg: 'command:  npx\nargs:     -y <tool>\nenv:      SYSTEM_URL, SYSTEM_API_KEY, ...' },
+];
+---
+<BaseLayout title="Docs" description={description} jsonLd={jsonLd}>
+  <main>
+    <header class="phead">
+      <div class="wrap"><div class="frame">
+        <nav class="crumb" aria-label="Breadcrumb"><a href="/">Lidless Labs</a> / <span>Docs</span></nav>
+        <h1>Docs</h1>
+        <p class="lede">Every Lidless tool installs, connects, and guards writes the same way. This page covers the shared parts. Each tool's own page and README list its specific commands and variables.</p>
+      </div></div>
+    </header>
+
+    <div class="wrap layout">
+      <nav class="toc" aria-label="On this page">
+        <div class="k mono">on this page</div>
+        <a href="#shape">How the tools are built</a>
+        <a href="#install">Install</a>
+        <a href="#clients">Connect an AI client</a>
+        <a href="#creds">Credentials</a>
+        <a href="#gates">Write gates</a>
+        <a href="#tls">Self-signed certificates</a>
+        <a href="#cli">Scripts and cron</a>
+        <a href="#trouble">Troubleshooting</a>
+        <a href="#update">Updates and security</a>
+      </nav>
+
+      <div class="doc">
+    <section id="shape">
+      <h2>How the tools are built</h2>
+      <p class="sub">The catalog has three kinds of tool. The kind decides how you install and run it.</p>
+      <div class="kinds">
+        <div><div class="k mono">mcp server</div><h3>For AI clients</h3><p>Speaks the Model Context Protocol over stdio. Your client starts it as a child process, so it opens no network port.</p></div>
+        <div><div class="k mono">cli</div><h3>For shells and cron</h3><p>Several servers ship a companion CLI, such as <code class="i">proxmoxctl</code> or <code class="i">jellyctrl</code>, that reads the same environment variables.</p></div>
+        <div><div class="k mono">app</div><h3>Self-hosted</h3><p>Dashboards and workbenches like watchtower run from source on your own machine. Their README covers setup.</p></div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>Install</h2>
+      <p class="sub">Published tools are on npm. Pick whichever of these fits how you work.</p>
+      <div class="steps">
+        <div class="step"><div class="k mono">run on demand</div><div class="code"><pre>npx -y &lt;tool&gt;</pre></div><p class="note">Nothing to install globally. Your client runs this command each time it starts the server.</p></div>
+        <div class="step"><div class="k mono">install globally</div><div class="code"><pre>npm i -g &lt;tool&gt;</pre></div><p class="note">Faster startup, and the command is on your PATH for the CLI too.</p></div>
+        <div class="step"><div class="k mono">from source</div><div class="code"><pre>git clone https://github.com/lidless-labs/&lt;tool&gt;.git
+cd &lt;tool&gt; &amp;&amp; npm install &amp;&amp; npm run build</pre></div><p class="note">For apps, and for anything not on npm yet. Check the README for the exact build steps.</p></div>
+      </div>
+      <p class="note">The Node tools need Node 20 or newer. Python tools name their version on the tool page.</p>
+    </section>
+
+    <section id="clients">
+      <h2>Connect an AI client</h2>
+      <p class="sub">Any MCP client works. Swap <code class="i">&lt;tool&gt;</code> and the variables for the ones listed on the tool's page.</p>
+      <div class="tabs" id="clientTabs" role="tablist" aria-label="AI client">
+        {CLIENTS.map((c, i) => <button type="button" role="tab" data-i={i} aria-pressed={i === 0 ? 'true' : 'false'}>{c.name}</button>)}
+      </div>
+      {CLIENTS.map((c, i) => (
+        <div class="client" data-i={i} hidden={i !== 0}>
+          <div class="code"><pre class="term">{c.cfg}</pre></div>
+          <p class="note mono">{c.path}</p>
+        </div>
+      ))}
+      <p class="note">Restart the client after editing its config. Most clients only read the server list at startup.</p>
+    </section>
+
+    <section id="creds">
+      <h2>Credentials</h2>
+      <p class="sub">Tools read connection details from environment variables, named after the system they talk to.</p>
+      <div class="code"><pre>&lt;SYSTEM&gt;_URL        where the system lives, e.g. https://siem.lan:55000
+&lt;SYSTEM&gt;_API_KEY    or a token / username + password, depending on the system</pre></div>
+      <h3 class="h">Start with a read-only account</h3>
+      <p>Create a dedicated user or API token for the tool with read-only permissions. Upgrade its role later, once you have seen how your agent uses it. Most tools are useful without any write access.</p>
+      <h3 class="h">Keep secrets out of shared configs</h3>
+      <p>Client config files often end up in dotfile repos. Where your client supports it, reference variables from your shell or a secret manager rather than pasting keys inline. Several tools also redact secrets from their own logs and error messages.</p>
+    </section>
+
+    <section id="gates">
+      <h2>Write gates</h2>
+      <p class="sub">An agent can read freely, but it has to be told explicitly before it changes anything. Tools that can write use up to three tiers.</p>
+      <div class="tiers">
+        <div class="t1"><div class="k mono">read</div><h3>Open by default</h3><p>Queries, searches, and lookups work as soon as the server is connected.</p></div>
+        <div class="t2"><div class="k mono">write</div><h3><code class="i">confirm: true</code></h3><p>State-changing calls refuse to run unless the call itself passes the confirm flag.</p></div>
+        <div class="t3"><div class="k mono">destructive</div><h3>Env flag + confirm</h3><p>Deletes and irreversible actions stay off until you set the tool's opt-in variable, such as <code class="i">MISP_ALLOW_DESTRUCTIVE</code> or <code class="i">PROXMOX_ENABLE_DESTRUCTIVE</code>.</p></div>
+      </div>
+      <p class="note">A refused call returns an error and sends nothing to your system. If you see one, the gate is doing its job. The Safety section on each tool page lists its exact flags.</p>
+    </section>
+
+    <section id="tls">
+      <h2>Self-signed certificates</h2>
+      <p class="sub">Homelab and SOC systems often run with self-signed TLS.</p>
+      <p>Tools that talk HTTPS have their own verify flag, for example <code class="i">MISP_VERIFY_SSL=false</code> or <code class="i">LIBRENMS_TLS_INSECURE=1</code>. The relaxation applies only to that tool's requests to that system, never the whole process. A better fix is to add your internal CA to the trust store and leave verification on.</p>
+    </section>
+
+    <section id="cli">
+      <h2>Scripts and cron</h2>
+      <p class="sub">The companion CLIs cover the jobs you want on a schedule rather than in a chat.</p>
+      <p>They read the same environment variables as the MCP server, so one set of credentials serves both. They default to reads, which makes them safe to run from cron or CI. Each tool's README lists its commands.</p>
+    </section>
+
+    <section id="trouble">
+      <h2>Troubleshooting</h2>
+      <div class="faq">
+        <details><summary>The client doesn't show the tool</summary><p>Restart the client fully. Then check that the command in its config runs in a terminal. Desktop apps often start with a shorter PATH than your shell, so use the full path to <code class="i">npx</code> or the installed binary if it is not found.</p></details>
+        <details><summary>401 or 403 from the system</summary><p>The credentials are wrong, expired, or the account lacks the role for that call. Test the same URL and key with curl, and check the account's permissions on the system itself.</p></details>
+        <details><summary>Certificate or TLS errors</summary><p>The system uses a certificate your machine does not trust. See <a href="#tls" class="inl">self-signed certificates</a>.</p></details>
+        <details><summary>A call was "refused"</summary><p>It hit a write gate. Pass <code class="i">confirm: true</code> if you meant it, or set the tool's opt-in variable for destructive actions. See <a href="#gates" class="inl">write gates</a>.</p></details>
+        <details><summary>It worked yesterday and now fails at startup</summary><p>Check your Node version against the tool's requirement, then check the <a href="/blog" class="inl">changelog</a> for the release you picked up.</p></details>
+      </div>
+    </section>
+
+    <section id="update">
+      <h2>Updates and security</h2>
+      <p class="sub">Releases are listed in the <a href="/blog" class="inl">changelog</a>.</p>
+      <div class="code"><pre>npm i -g &lt;tool&gt;@latest      # global install
+npx -y &lt;tool&gt;@latest        # on-demand; npx otherwise reuses its cache</pre></div>
+      <h3 class="h">Found a vulnerability?</h3>
+      <p>Report it privately through the repository's Security tab on GitHub rather than a public issue. Bugs and feature requests go in the repo's issues.</p>
+    </section>
+      </div>
+    </div>
+  </main>
+
+  <script is:inline>
+    (() => {
+      const tabs = document.getElementById('clientTabs');
+      const panels = [...document.querySelectorAll('.client')];
+      tabs.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        tabs.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        panels.forEach((p) => { p.hidden = p.dataset.i !== b.dataset.i; });
+      });
+      const links = [...document.querySelectorAll('.toc a')];
+      const io = new IntersectionObserver((es) => es.forEach((e) => {
+        if (e.isIntersecting) links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
+      }), { rootMargin: '-15% 0px -75% 0px' });
+      document.querySelectorAll('.doc > section').forEach((s) => io.observe(s));
+    })();
+  </script>
+
+  <style>
+  .layout { display:grid; grid-template-columns:220px 1fr; gap:32px; }
+  /* table of contents: plain text links, the active one just turns white */
+  .toc { position:sticky; top:84px; align-self:start; padding-top:40px; font-size:13.5px; }
+  .toc .k { font-size:12px; color:var(--text-dim); margin:0 0 10px; }
+  .toc a { display:block; padding:4px 0; color:var(--text-dim); transition:color .15s; }
+  .toc a:hover, .toc a.on { color:var(--text); }
+  .doc > section { padding:40px 0; border-bottom:1px solid var(--hairline); scroll-margin-top:64px; }
+  .doc > section:last-child { border-bottom:0; padding-bottom:96px; }
+  .doc h2 { margin:0 0 6px; font-size:22px; letter-spacing:-.02em; font-weight:600; }
+  .doc .sub { color:var(--text-muted); margin:0 0 22px; max-width:640px; }
+  .doc p { color:var(--text-muted); max-width:680px; }
+
+  .steps { display:grid; gap:20px; }
+  .step .k { font-size:12px; color:var(--text-dim); margin-bottom:8px; }
+  .step p { margin:0 0 10px; }
+
+  .tiers { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  .tiers > div { padding:20px 22px; }
+  .tiers > div + div { border-left:1px solid var(--hairline); }
+  .tiers .k { font-size:12px; margin-bottom:10px; }
+  .tiers h3 { margin:0 0 6px; font-size:15px; font-weight:500; }
+  .tiers p { margin:0; font-size:14px; }
+  .t1 .k { color:#34d399; } .t2 .k { color:#fbbf24; } .t3 .k { color:#f87171; }
+  .note { font-size:13px; color:var(--text-dim); margin-top:12px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; font-weight:500; font-size:12px; color:var(--text-dim); padding:0 12px 10px 0; border-bottom:1px solid var(--hairline-strong); }
+  td { padding:11px 12px 11px 0; border-bottom:1px solid var(--hairline); vertical-align:top; color:var(--text-muted); }
+  td:first-child a { color:var(--text); font-weight:500; transition:color .15s; }
+  td:first-child a:hover { color:var(--accent); }
+  td .env { display:flex; flex-wrap:wrap; gap:4px; }
+  td .none { color:var(--text-dim); }
+  .kinds { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  .kinds > div { padding:20px 22px; }
+  .kinds > div + div { border-left:1px solid var(--hairline); }
+  .kinds .k { font-size:12px; color:var(--accent); margin-bottom:10px; }
+  .kinds h3 { margin:0 0 6px; font-size:15px; font-weight:500; }
+  .kinds p { margin:0; font-size:14px; }
+  .faq { border-top:1px solid var(--hairline); }
+  .faq details { border-bottom:1px solid var(--hairline); }
+  .faq summary { list-style:none; cursor:pointer; padding:14px 0; font-size:14.5px; display:flex; justify-content:space-between; gap:16px; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:'+'; color:var(--text-dim); font-family:var(--mono); }
+  .faq details[open] summary::after { content:'−'; }
+  .faq details p { margin:0 0 16px; font-size:14px; }
+  .doc h3.h { font-size:15px; font-weight:500; margin:24px 0 8px; }
+
+    .inl { color: var(--text); border-bottom: 1px solid var(--hairline-strong); }
+    .client[hidden] { display: none; }
+    .doc { min-width: 0; }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; gap: 0; }
+      .toc { display: none; }
+      .tiers, .kinds { grid-template-columns: 1fr; }
+      .tiers > div + div, .kinds > div + div { border-left: 0; border-top: 1px solid var(--hairline); }
+    }
+  </style>
+</BaseLayout>

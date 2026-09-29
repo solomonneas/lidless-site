@@ -22,6 +22,7 @@ export async function GET({ site }: { site?: URL }) {
     { loc: `${origin}/`, lastmod: FALLBACK_LASTMOD, priority: '1.0' },
     ...TOOL_SLUGS.map((slug) => ({ loc: `${origin}/${slug}`, lastmod: FALLBACK_LASTMOD, priority: '0.7' })),
     { loc: `${origin}/blog`, lastmod: FALLBACK_LASTMOD, priority: '0.6' },
+    { loc: `${origin}/docs`, lastmod: FALLBACK_LASTMOD, priority: '0.6' },
     // Only tools with at least one release: empty changelog pages are noindexed.
     ...TOOL_SLUGS.filter((slug) => newestByTool.has(slug)).map((slug) => ({
       loc: `${origin}/changelog/${slug}`,

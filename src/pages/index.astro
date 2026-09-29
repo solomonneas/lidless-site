@@ -1,20 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, EXTERNAL } from '../lib/site.ts';
-import { TOOLS, CATEGORY_ORDER, type Lifecycle } from '../lib/tools.ts';
+import { TOOLS, CATEGORY_ORDER } from '../lib/tools.ts';
 import { graph, organizationLd, websiteLd } from '../lib/seo.ts';
-import { fetchLatestRelease, fetchCIStatus, fetchGitHubRepoData, formatRelativeDate } from '../lib/github-data.ts';
+import { fetchLatestRelease, fetchCIStatus, fetchGitHubRepoData } from '../lib/github-data.ts';
 import { parseRepo } from '../lib/releases.ts';
 
 // Homepage JSON-LD: who we are + this site.
 const jsonLd = graph([organizationLd(), websiteLd('Lidless', 'https://lidless.dev')]);
 
-// Lifecycle -> watch-list mark class (dot + label, no badge chrome).
-const lifeClass = (l: Lifecycle) =>
-  l === 'Active' ? 'life life-active' : l === 'WIP' ? 'life life-wip' : 'life life-exp';
-
 const total = TOOLS.length;
-const categories = CATEGORY_ORDER.length;
 
 // Live per-tool health for the grid: last release date + CI status. Build-time,
 // static (no hydration). Cached per repo, fails soft, so a card just omits the
@@ -51,22 +46,39 @@ const CAT_ANCHOR: Record<string, string> = {
   Network: 'network',
   Homelab: 'homelab',
 };
-const CAT_NUM: Record<string, string> = {
-  'Security / SOC': '01',
-  'Threat Intelligence & OSINT': '02',
-  Network: '03',
-  Homelab: '04',
+const CAT_SHORT: Record<string, string> = {
+  'Security / SOC': 'SOC',
+  'Threat Intelligence & OSINT': 'Intel',
+  Network: 'Network',
+  Homelab: 'Homelab',
+};
+const CAT_BLURB: Record<string, string> = {
+  'Security / SOC': 'SIEM, IDS, incident response',
+  'Threat Intelligence & OSINT': 'intel and OSINT',
+  Network: 'NMS, automation, mesh',
+  Homelab: 'hypervisor and self-hosted apps',
 };
 ---
 <BaseLayout title={SITE.seoTitle} description={SITE.metaDescription} jsonLd={jsonLd}>
   <main>
-    <!-- ============================ HERO ============================ -->
-    <header class="hero px-6 md:px-10 pt-20 pb-16 max-w-3xl mx-auto text-center flex flex-col items-center">
-      <p class="kicker m-0">LIDLESS LABS &middot; THE EYE DOES NOT CLOSE</p>
-
-      <!-- the dimensional, unsleeping eye: slate socket, white sclera, blue iris.
-           the eyeball group follows your cursor. no radar, no glow, no hardware. -->
-      <svg class="lid-eye mt-6" viewBox="0 0 120 120" width="158" height="158"
+    <header class="hero">
+      <div class="wrap">
+        <div class="hero-copy">
+          <span class="pill"><b>{total} tools</b> &middot; all MIT, all local-first</span>
+          <h1>Watch your whole stack<br /><span>from one agent.</span></h1>
+          <p class="lede">
+            MCP servers and CLIs for the SOC, the network, and the homelab. Wazuh, MISP, TheHive,
+            LibreNMS, and Proxmox, read like a console by your AI client.
+          </p>
+          <div class="cta">
+            <a class="btn solid" href="#tools">Browse tools</a>
+            <a class="btn" href={EXTERNAL.github}>View on GitHub &rarr;</a>
+          </div>
+          <div class="install mono"><span class="p">$</span><span class="cmd term">npx -y wazuh-mcp</span></div>
+        </div>
+        <div class="hero-eye">
+          <span class="corner tl mono">lidless.dev</span>
+      <svg class="lid-eye mt-6" viewBox="0 0 120 120" width="200" height="200"
         role="img" aria-label="The Lidless eye - it follows your cursor and never closes.">
         <defs>
           <radialGradient id="ls" cx="40%" cy="34%" r="74%"><stop offset="0%" stop-color="#fbfdfe"/><stop offset="44%" stop-color="#dde4e9"/><stop offset="80%" stop-color="#aeb8bf"/><stop offset="100%" stop-color="#828c93"/></radialGradient>
@@ -132,99 +144,148 @@ const CAT_NUM: Record<string, string> = {
           })();
         })();
       </script>
-
-      <h1 class="wordmark text-5xl md:text-6xl leading-[1.04] mt-5 uppercase">Lidless</h1>
-      <p class="font-mono text-base md:text-lg mt-3 motto" style="color: var(--accent); letter-spacing: 0.04em;">
-        {SITE.motto}
-      </p>
-      <p class="text-lg mt-5 max-w-xl mx-auto" style="color: var(--text-muted);">
-        Open-source tooling that keeps watch over your stack - the SOC, the network, and the
-        homelab - all speaking one interface to your AI client.
-      </p>
-
-      <div class="flex flex-wrap gap-3 mt-7 items-center justify-center">
-        <a href="#tools" class="btn-primary">Browse the tools &darr;</a>
-        <a href={EXTERNAL.github} class="btn-ghost">View on GitHub &rarr;</a>
-      </div>
-
-      <div class="spec-strip mt-10 w-full max-w-xl text-left">
-        <div class="spec"><div class="n">{total}</div><div class="l">tools</div></div>
-        <div class="spec"><div class="n">{categories}</div><div class="l">domains</div></div>
-        <div class="spec"><div class="n">MIT</div><div class="l">licensed</div></div>
-        <div class="spec"><div class="n">local</div><div class="l">first</div></div>
+          <span class="corner br mono">{SITE.motto.toLowerCase().replace(/\.$/, '')}</span>
+        </div>
       </div>
     </header>
 
-    <!-- ============================ TOOLS ============================ -->
-    <section id="tools" class="px-6 md:px-10 py-12 max-w-6xl mx-auto">
-      <div class="section-rule"><h2 class="kicker m-0">THE WATCH FLOOR</h2></div>
-      <p class="max-w-2xl mt-7 mb-9" style="color: var(--text-muted);">
-        Every tool is open source and built to the same shape: wire a real security, network, or
-        homelab system into an AI client and read it like a console. Three watch surfaces, read
-        side by side.
-      </p>
+    <section id="tools" class="tools">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <h2>Tools</h2>
+            <p>Each one wires a real system into your AI client. Writes are gated.</p>
+          </div>
+          <div class="tabs" id="toolTabs" role="group" aria-label="Filter by category">
+            <button type="button" data-cat="all" aria-pressed="true">All</button>
+            {CATEGORY_ORDER.map((c) => <button type="button" data-cat={CAT_ANCHOR[c]} aria-pressed="false">{CAT_SHORT[c]}</button>)}
+          </div>
+        </div>
+        <div class="filter">
+          <label class="sr-only" for="toolFilter">Filter tools</label>
+          <input id="toolFilter" class="mono" type="search" placeholder="Filter tools..." autocomplete="off" />
+        </div>
 
-      <div class="columns">
-        {CATEGORY_ORDER.map((cat) => {
-          const inCat = TOOLS.filter((t) => t.category === cat);
-          return (
-            <div class="col" id={CAT_ANCHOR[cat]}>
-              <div class="col-head">
-                <span class="num">{CAT_NUM[cat]}</span>
-                <h2>{cat}</h2>
-                <span class="count">{inCat.length}</span>
-              </div>
-              <div class="col-rule"></div>
-              <div class="watch-list">
-                {inCat.map((t) => (
-                  <a class="tool" href={t.href ?? `/${t.slug}`} target={t.href ? '_blank' : undefined} rel={t.href ? 'noopener noreferrer' : undefined}>
-                    <div class="tool-top">
-                      <span class="tool-name">{t.name}{t.href && <span class="ext" aria-hidden="true"> ↗</span>}</span>
-                      {health.get(t.slug)?.version && <span class="tool-ver font-mono">{health.get(t.slug)!.version}</span>}
-                      {health.get(t.slug)?.ci && (
-                        <span class={`ci-dot ci-${health.get(t.slug)!.ci}`} title={`CI ${health.get(t.slug)!.ci}`}></span>
-                      )}
-                      {t.lifecycle !== 'Active' && (
-                        <span class={lifeClass(t.lifecycle)}><span class="dot"></span>{t.lifecycle}</span>
-                      )}
-                    </div>
-                    <div class="tool-desc">{t.oneLiner}</div>
-                    {health.get(t.slug)?.updated && (
-                      <div class="tool-upd font-mono">updated {formatRelativeDate(health.get(t.slug)!.updated!)}</div>
-                    )}
-                  </a>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+        <div id="toolIndex">
+          {CATEGORY_ORDER.map((cat) => {
+            const inCat = TOOLS.filter((t) => t.category === cat);
+            return (
+              <section class="sec group" id={CAT_ANCHOR[cat]} data-cat={CAT_ANCHOR[cat]}>
+                <h3 class="label">{cat}<small><span class="count">{inCat.length}</span> tools &middot; {CAT_BLURB[cat]}</small></h3>
+                <div>
+                  {inCat.map((t) => {
+                    const h = health.get(t.slug);
+                    const ext = Boolean(t.href);
+                    return (
+                      <a class="row" href={t.href ?? `/${t.slug}`} target={ext ? '_blank' : undefined} rel={ext ? 'noopener noreferrer' : undefined}
+                        data-q={`${t.name} ${t.oneLiner}`.toLowerCase()}>
+                        <span class="n">{t.name}</span>
+                        <span class="d">{t.oneLiner}</span>
+                        {h?.version && <span class="v">{h.version}</span>}
+                        {t.lifecycle !== 'Active' && <span class="v">{t.lifecycle}</span>}
+                        <span class="go" aria-hidden="true">{ext ? '\u2197' : '\u2192'}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+          <p class="no-match mono" id="noMatch" hidden>No tools match.</p>
+        </div>
 
-    <!-- ============================ WHAT THIS IS ============================ -->
-    <section id="about" class="px-6 md:px-10 py-12 max-w-6xl mx-auto">
-      <div class="section-rule"><h2 class="kicker m-0">WHAT THIS IS</h2></div>
-      <div class="what mt-7">
-        <p>
-          Lidless is lab-grade, open-source tooling that comes out of running the real thing: a
-          SIEM queried under pressure, network monitoring that has to be trusted, a hypervisor
-          that has to stay up. Each tool is honest about its maturity and built to be read.
-        </p>
-        <p>
-          Everything is MIT licensed and local-first.
-          <span class="em">The eye does not close.</span>
-        </p>
+        <div class="principles">
+          <div><div class="k mono">01 / read-first</div><h3>Read-only by default</h3><p>Anything that changes state needs an explicit confirm. Your agent looks before it touches.</p></div>
+          <div><div class="k mono">02 / local</div><h3>Runs on your machine</h3><p>The servers run beside your client over stdio. Credentials stay in your environment.</p></div>
+          <div><div class="k mono">03 / one shape</div><h3>Learn it once</h3><p>Every tool is configured and gated the same way. <a href="/docs">The docs</a> cover all of it.</p></div>
+        </div>
       </div>
     </section>
   </main>
 
+  <script is:inline>
+    (() => {
+      const tabs = document.getElementById('toolTabs');
+      const input = document.getElementById('toolFilter');
+      const groups = [...document.querySelectorAll('#toolIndex .group')];
+      const none = document.getElementById('noMatch');
+      let cat = 'all';
+      const apply = () => {
+        const q = input.value.trim().toLowerCase();
+        let shown = 0;
+        groups.forEach((g) => {
+          let n = 0;
+          g.querySelectorAll('.row').forEach((r) => {
+            const hit = !q || r.dataset.q.includes(q);
+            r.hidden = !hit;
+            if (hit) n++;
+          });
+          g.hidden = (cat !== 'all' && g.dataset.cat !== cat) || n === 0;
+          g.querySelector('.count').textContent = n;
+          if (!g.hidden) shown++;
+        });
+        none.hidden = shown > 0;
+      };
+      tabs.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        cat = b.dataset.cat;
+        tabs.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        apply();
+      });
+      input.addEventListener('input', apply);
+    })();
+  </script>
+
   <style>
-    .ci-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .ci-success { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.5); }
-    .ci-failure { background: #f87171; }
-    .ci-pending { background: #fbbf24; }
-    .ci-cancelled, .ci-skipped { background: var(--text-dim); }
-    .tool-upd { font-size: 0.66rem; color: var(--text-dim); margin-top: 0.25rem; letter-spacing: 0.03em; }
-    .ext { color: var(--text-dim); font-size: 0.75em; }
+    .hero { border-bottom: 1px solid var(--hairline); }
+    .hero .wrap { display: grid; grid-template-columns: 1.2fr 1fr; border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline); }
+    .hero-copy { padding: 88px 48px 72px 40px; }
+    .pill { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline-strong); border-radius: 999px; padding: 4px 12px; }
+    .pill b { color: var(--text); font-weight: 500; }
+    h1 { font-size: 56px; line-height: 1.02; letter-spacing: -.045em; font-weight: 600; margin: 22px 0 18px; }
+    h1 span { color: var(--text-dim); }
+    .lede { color: var(--text-muted); font-size: 17px; max-width: 470px; margin: 0 0 30px; }
+    .cta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .install { margin-top: 28px; display: flex; align-items: center; gap: 12px; max-width: 420px; height: 42px; padding: 0 12px 0 14px; border: 1px solid var(--hairline-strong); border-radius: 8px; background: var(--bg-panel); font-size: 13px; color: var(--text-muted); position: relative; }
+    .install .p { color: var(--text-dim); }
+    .install :global(.term-wrap) { position: static; flex: 1; }
+    .install :global(.copy-btn) { top: 50%; transform: translateY(-50%); }
+    .hero-eye { border-left: 1px solid var(--hairline); display: grid; place-items: center; position: relative; min-height: 360px;
+      background-image: linear-gradient(var(--hairline) 1px, transparent 1px), linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+      background-size: 40px 40px; background-position: -1px -1px; }
+    .hero-eye::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 0 22%, #000 70%); pointer-events: none; }
+    .hero-eye :global(.lid-eye) { position: relative; z-index: 1; }
+    .corner { position: absolute; z-index: 1; font-size: 11px; color: var(--text-dim); }
+    .corner.tl { top: 14px; left: 16px; }
+    .corner.br { bottom: 14px; right: 16px; }
+
+    .tools { padding: 80px 0 40px; }
+    .sec-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+    .sec-head h2 { font-size: 32px; letter-spacing: -.035em; font-weight: 600; margin: 0; }
+    .sec-head p { color: var(--text-muted); margin: 6px 0 0; }
+    .filter { padding: 12px 0; border-bottom: 1px solid var(--hairline); position: sticky; top: 56px; background: rgba(0, 0, 0, .85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 5; }
+    .filter input { width: 100%; background: transparent; border: 0; outline: 0; color: var(--text); font-size: 14px; }
+    .filter input::placeholder { color: var(--text-dim); }
+    .group { scroll-margin-top: 110px; }
+    .group > .label { top: 130px; }
+    .no-match { color: var(--text-dim); padding: 40px 0; }
+
+    .principles { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; margin: 40px 0 60px; }
+    .principles > div { padding: 28px; }
+    .principles > div + div { border-left: 1px solid var(--hairline); }
+    .principles h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; }
+    .principles p { margin: 0; color: var(--text-muted); font-size: 14px; }
+    .principles p a { color: var(--text); border-bottom: 1px solid var(--hairline-strong); }
+    .principles .k { font-size: 12px; color: var(--accent); margin-bottom: 14px; }
+
+    @media (max-width: 860px) {
+      .hero .wrap { grid-template-columns: 1fr; border: 0; }
+      .hero-copy { padding: 48px 0 32px; }
+      h1 { font-size: 40px; }
+      .hero-eye { border-left: 0; border-top: 1px solid var(--hairline); min-height: 280px; order: -1; }
+      .principles { grid-template-columns: 1fr; }
+      .principles > div + div { border-left: 0; border-top: 1px solid var(--hairline); }
+    }
   </style>
 </BaseLayout>

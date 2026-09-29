@@ -14,10 +14,9 @@ export const SITE = {
 };
 
 export const NAV_LINKS = [
-  { label: 'Security / SOC', href: '/#security' },
-  { label: 'Network', href: '/#network' },
-  { label: 'Homelab', href: '/#homelab' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Tools', href: '/#tools' },
+  { label: 'Changelog', href: '/blog' },
+  { label: 'Docs', href: '/docs' },
 ];
 
 export const EXTERNAL = {

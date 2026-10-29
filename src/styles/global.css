@@ -1,32 +1,54 @@
 @import "tailwindcss";
 
 /* ===========================================================================
-   Lidless Labs (v4): black, hairlines, plain text.
-   shadcn / Vercel / Cursor direction. Geist + Geist Mono are loaded via a
-   Google Fonts <link> in BaseLayout.astro. Design rules live in AGENTS.md:
-   no status-light dots, no side-bar hovers, no big-number stat boards.
+   Lidless Labs (v5): monochrome ink on near-black or near-white, hairlines,
+   plain text. The visual system follows Brigade Stack: one theme pair that
+   follows the OS until the visitor picks one, ink as the only accent, and the
+   Lidless eye as the only color on the page. Geist + Geist Mono load via a
+   Google Fonts <link> in BaseLayout.astro. Design rules live in AGENTS.md.
    =========================================================================== */
-:root {
-  color-scheme: dark;
-  --bg: #000;
-  --bg-panel: #0a0a0a;
-  --bg-panel-2: #141414;
-  --white: #ededed;
+:root, [data-theme="dark"] {
+  --bg: #0b0b0b;
+  --bg-panel: #101010;
+  --bg-panel-2: #161616;
   --text: #ededed;
-  --text-muted: #a1a1a1;
-  --text-dim: #6e6e6e;
-  --accent: #38bdf8;
-  --accent-dim: #1f7fb0;
-  --hairline: #1f1f1f;
-  --hairline-strong: #2e2e2e;
-  --on-accent: #000;
-  --danger: #f87171;
-  --warn: #fbbf24;
+  --text-muted: #a3a3a3;
+  --text-dim: #959595;
+  /* Second headline clause. Large text only. */
+  --second: #6f6f6f;
+  --accent: #ededed;
+  --hairline: #222222;
+  --hairline-strong: #333333;
+  --on-accent: #0b0b0b;
+  /* Meaning, not branding: CI failing / running, write-gate tiers. */
+  --pos: #6bbf7a;
+  --warn: #d6b25e;
+  --danger: #d97a6b;
+  --white: var(--text);
   --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --mono: "Geist Mono", ui-monospace, monospace;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sticky-top: 0px;
 }
+[data-theme="light"] {
+  --bg: #fcfcfc;
+  --bg-panel: #fcfcfc;
+  --bg-panel-2: #f4f4f4;
+  --text: #111111;
+  --text-muted: #5f5f5f;
+  --text-dim: #6b6b6b;
+  --second: #8a8a8a;
+  --accent: #111111;
+  --hairline: #eaeaea;
+  --hairline-strong: #d4d4d4;
+  --on-accent: #fcfcfc;
+  --pos: #3f8a54;
+  --warn: #8a6a1c;
+  --danger: #b35540;
+}
+:root { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
 
-html { background: var(--bg); color: var(--text); scroll-padding-top: 72px; }
+html { background: var(--bg); color: var(--text); scroll-padding-top: calc(var(--sticky-top) + 24px); }
 body {
   font-family: var(--sans);
   margin: 0;
@@ -34,40 +56,49 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: 15px;
   line-height: 1.6;
+  letter-spacing: -0.011em;
 }
+code, pre, kbd, samp, .mono, .font-mono { font-family: var(--mono); letter-spacing: 0; }
 a { color: inherit; text-decoration: none; }
-.mono, .font-mono { font-family: var(--mono); }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+/* The content column under the rail. Pages keep using .wrap as their container. */
+.wrap { max-width: 68rem; margin: 0; padding: 0 0 0 var(--column-pad, 52px); }
 .lid-eye { display: block; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+* { scrollbar-width: thin; scrollbar-color: var(--hairline-strong) transparent; }
+
 /* buttons */
-.btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1px solid var(--hairline-strong); color: var(--text); background: transparent; transition: background .15s, border-color .15s; }
-.btn:hover { background: #111; border-color: #3a3a3a; }
-.btn.solid { background: var(--text); color: #000; border-color: var(--text); }
-.btn.solid:hover { background: #fff; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 40px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 550; white-space: nowrap; border: 1px solid var(--hairline-strong); color: var(--text); background: transparent; cursor: pointer; transition: background-color .12s, border-color .12s, color .12s, opacity .12s; }
+.btn:hover { background: var(--bg-panel-2); }
+.btn.solid { background: var(--text); color: var(--bg); border-color: var(--text); }
+.btn.solid:hover { background: var(--text); opacity: .86; }
+/* Copy-a-command button: dashed outline, the command in mono, a Copy label. */
+.btn.dashed { border-style: dashed; color: var(--text-muted); font-weight: 500; }
+.btn.dashed:hover, .btn.dashed[data-copied] { background: transparent; border-color: var(--text-dim); color: var(--text); }
+.btn.dashed code { color: var(--text); font-size: 13px; }
 .btn.sm { height: 32px; font-size: 13px; }
 
 /* segmented tabs */
-.tabs { display: inline-flex; flex-wrap: wrap; padding: 3px; border: 1px solid var(--hairline-strong); border-radius: 9px; background: var(--bg-panel); }
-.tabs button { font: inherit; font-size: 13px; color: var(--text-muted); background: none; border: 0; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tabs { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 1px solid var(--hairline); border-radius: 8px; }
+.tabs button { font: inherit; font-size: 13px; color: var(--text-dim); background: none; border: 0; height: 28px; padding: 0 12px; border-radius: 6px; cursor: pointer; }
 .tabs button:hover { color: var(--text); }
-.tabs button[aria-pressed="true"] { background: #1a1a1a; color: var(--text); box-shadow: inset 0 0 0 1px var(--hairline-strong); }
+.tabs button[aria-pressed="true"] { background: var(--bg-panel-2); color: var(--text); font-weight: 550; }
 
-/* page header: a short framed band, same frame as the homepage hero */
-.phead { border-bottom: 1px solid var(--hairline); }
-.phead .frame { border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline); padding: 44px 40px 36px; }
-.crumb { font-size: 13px; color: var(--text-dim); margin: 0 0 18px; }
+/* page header: crumbs, title, lede, closed by a hairline inside the column */
+.phead .frame { padding: 56px 0 36px; border-bottom: 1px solid var(--hairline); }
+.crumb { font-size: 13.5px; color: var(--text-dim); margin: 0 0 14px; }
 .crumb a:hover { color: var(--text); }
 .crumb span { color: var(--text-muted); }
-.phead h1 { font-size: 40px; line-height: 1.08; letter-spacing: -.04em; font-weight: 600; margin: 0; }
-.phead .lede { color: var(--text-muted); font-size: 16px; max-width: 640px; margin: 12px 0 0; }
-.phead .lede a { color: var(--text); border-bottom: 1px solid var(--hairline-strong); }
+.phead h1 { font-size: 32px; line-height: 1.2; letter-spacing: -.03em; font-weight: 600; margin: 0; }
+.phead .lede { color: var(--text-muted); font-size: 17px; line-height: 1.65; max-width: 40rem; margin: 12px 0 0; }
+.phead .lede a { color: var(--text); text-decoration: underline; text-decoration-color: var(--hairline-strong); text-underline-offset: 3px; }
+.phead .lede a:hover { text-decoration-color: currentColor; }
 
 /* label column + content, the rhythm every page shares */
-.sec { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding: 40px 0; border-bottom: 1px solid var(--hairline); }
+.sec { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; padding: 40px 0; border-bottom: 1px solid var(--hairline); }
 .sec:last-child { border-bottom: 0; }
-.sec > .label { margin: 0; font-size: 14px; font-weight: 500; position: sticky; top: 84px; align-self: start; }
+.sec > .label { margin: 0; font-size: 14px; font-weight: 550; position: sticky; top: calc(var(--sticky-top) + 24px); align-self: start; }
 .sec > .label small { display: block; color: var(--text-dim); font-size: 12px; font-weight: 400; margin-top: 2px; }
 
 /* list rows: hover changes text colour only */
@@ -78,13 +109,13 @@ a { color: inherit; text-decoration: none; }
 .row .d { color: var(--text-muted); font-size: 14px; flex: 1; min-width: 0; }
 .row .v { font-family: var(--mono); font-size: 12px; color: var(--text-dim); white-space: nowrap; }
 .row .go { color: var(--text-dim); font-size: 13px; opacity: 0; transition: opacity .15s; }
-a.row:hover .n { color: var(--accent); }
+a.row:hover .d { color: var(--text); }
 a.row:hover .go { opacity: 1; }
 
 /* code */
-.code { position: relative; border: 1px solid var(--hairline-strong); border-radius: 10px; background: var(--bg-panel); }
-.code pre { margin: 0; padding: 16px 18px; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--text-muted); overflow-x: auto; }
-code.i { font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 4px; padding: 0 5px; }
+.code { position: relative; border: 1px solid var(--hairline); border-radius: 10px; background: var(--bg-panel-2); }
+.code pre { margin: 0; padding: 16px 18px; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--text); overflow-x: auto; }
+code.i { font-family: var(--mono); font-size: .85em; color: var(--text); background: transparent; border: 1px solid var(--hairline); border-radius: 5px; padding: .05em .35em; }
 .note { font-size: 13px; color: var(--text-dim); margin: 10px 0 0; }
 
 /* rendered markdown (release notes) */
@@ -96,20 +127,20 @@ code.i { font-family: var(--mono); font-size: 12.5px; color: var(--text); backgr
 .prose ul, .prose ol { padding-left: 18px; margin: 0 0 14px; }
 .prose li { margin: 4px 0; }
 .prose li::marker { color: var(--text-dim); }
-.prose a { color: var(--text); border-bottom: 1px solid var(--hairline-strong); }
-.prose a:hover { border-color: var(--text-muted); }
-.prose code { font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 4px; padding: 0 5px; }
-.prose pre { background: var(--bg-panel); border: 1px solid var(--hairline-strong); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
+.prose a { color: var(--text); text-decoration: underline; text-decoration-color: var(--hairline-strong); text-underline-offset: 3px; }
+.prose a:hover { text-decoration-color: currentColor; }
+.prose code { font-family: var(--mono); font-size: .85em; color: var(--text); background: transparent; border: 1px solid var(--hairline); border-radius: 5px; padding: .05em .35em; }
+.prose pre { background: var(--bg-panel-2); border: 1px solid var(--hairline); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
 .prose pre code { background: none; border: 0; padding: 0; color: var(--text-muted); }
 .prose hr { border: 0; border-top: 1px solid var(--hairline); margin: 20px 0; }
 .empty-note { border: 1px dashed var(--hairline-strong); border-radius: 10px; padding: 16px 18px; color: var(--text-dim); font-size: 14px; max-width: 700px; }
 .empty-note a { color: var(--text-muted); border-bottom: 1px solid var(--hairline-strong); }
 
 /* prev / next */
-.pager { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; margin: 24px 0 96px; }
+.pager { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; margin: 24px 0 0; }
 .pager > * { padding: 18px 22px; min-height: 74px; }
 .pager a { transition: background .15s; }
-.pager a:hover { background: var(--bg-panel); }
+.pager a:hover { background: var(--bg-panel-2); }
 .pager > :last-child { border-left: 1px solid var(--hairline); text-align: right; }
 .pager .l { font-size: 12px; color: var(--text-dim); }
 .pager .t { font-family: var(--mono); font-size: 15px; font-weight: 500; }
@@ -117,12 +148,13 @@ code.i { font-family: var(--mono); font-size: 12.5px; color: var(--text); backgr
 /* copy button, attached to .term blocks by BaseLayout */
 .term { font-family: var(--mono); }
 .term-wrap { position: relative; }
-.copy-btn { position: absolute; top: 10px; right: 10px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); background: var(--bg); border: 1px solid var(--hairline-strong); border-radius: 5px; padding: 2px 7px; cursor: pointer; }
+.copy-btn { position: absolute; top: 10px; right: 10px; font-family: var(--sans); font-size: 12px; color: var(--text-dim); background: var(--bg); border: 1px solid var(--hairline); border-radius: 6px; padding: 2px 8px; cursor: pointer; }
+.copy-btn:hover { border-color: var(--hairline-strong); }
 .copy-btn:hover, .copy-btn.copied { color: var(--text); }
 
 @media (max-width: 860px) {
-  .phead .frame { padding: 32px 20px 28px; border: 0; }
-  .phead h1 { font-size: 32px; }
+  .phead .frame { padding: 32px 0 28px; }
+  .phead h1 { font-size: 28px; }
   .sec { grid-template-columns: 1fr; gap: 16px; padding: 32px 0; }
   .sec > .label { position: static; }
   .row { flex-wrap: wrap; gap: 4px 16px; }

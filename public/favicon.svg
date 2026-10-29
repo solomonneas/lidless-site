@@ -1,8 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- lidless eye: almond aperture that never closes, iris ring, pupil, glint -->
-  <rect width="64" height="64" rx="12" fill="#0a0a0c"/>
-  <path d="M14 32 C23.5 21, 40.5 21, 50 32 C40.5 43, 23.5 43, 14 32 Z" fill="#0a0a0c" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="32" cy="32" r="9" fill="none" stroke="#38bdf8" stroke-width="3"/>
-  <circle cx="32" cy="32" r="4" fill="#38bdf8"/>
-  <circle cx="35.8" cy="28.2" r="2" fill="#38bdf8"/>
+  <!-- lidless eye: almond aperture that never closes, iris ring, pupil, glint; follows the OS color scheme -->
+  <style>
+    .tile { fill: #0b0b0b; }
+    .ink { stroke: #ededed; }
+    .dot { fill: #ededed; }
+    @media (prefers-color-scheme: light) {
+      .tile { fill: #fcfcfc; }
+      .ink { stroke: #111111; }
+      .dot { fill: #111111; }
+    }
+  </style>
+  <rect class="tile" width="64" height="64" rx="12"/>
+  <path class="tile ink" d="M14 32 C23.5 21, 40.5 21, 50 32 C40.5 43, 23.5 43, 14 32 Z" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle class="ink" cx="32" cy="32" r="9" fill="none" stroke-width="3"/>
+  <circle class="dot" cx="32" cy="32" r="4"/>
+  <circle class="dot" cx="35.8" cy="28.2" r="2"/>
 </svg>

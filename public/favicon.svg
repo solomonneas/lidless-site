@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- lidless eye: almond aperture that never closes, iris ring, pupil, glint; follows the OS color scheme -->
   <style>
-    .tile { fill: #0b0b0b; }
-    .ink { stroke: #ededed; }
-    .dot { fill: #ededed; }
+    .tile { fill: #070c0c; }
+    .ink { stroke: #e9eeef; }
+    .dot { fill: #e9eeef; }
     @media (prefers-color-scheme: light) {
-      .tile { fill: #fcfcfc; }
-      .ink { stroke: #111111; }
-      .dot { fill: #111111; }
+      .tile { fill: #fafdfd; }
+      .ink { stroke: #0a1313; }
+      .dot { fill: #0a1313; }
     }
   </style>
   <rect class="tile" width="64" height="64" rx="12"/>

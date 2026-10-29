@@ -1,25 +1,32 @@
 @import "tailwindcss";
 
 /* ===========================================================================
-   Lidless Labs (v5): monochrome ink on near-black or near-white, hairlines,
-   plain text. The visual system follows Brigade Stack: one theme pair that
-   follows the OS until the visitor picks one, ink as the only accent, and the
-   Lidless eye as the only color on the page. Geist + Geist Mono load via a
-   Google Fonts <link> in BaseLayout.astro. Design rules live in AGENTS.md.
+   Lidless Labs (v5): monochrome ink, hairlines, plain text. The visual system
+   follows Brigade Stack: one theme pair that follows the OS until the visitor
+   picks one, ink as the only accent, and the Lidless eye as the only color on
+   the page. Geist + Geist Mono load via a Google Fonts <link> in
+   BaseLayout.astro. Design rules live in AGENTS.md.
+
+   The neutrals carry a faint tint at OKLCH hue 200, the eye's cyan iris (236)
+   pulled toward green. That keeps them clear of Brigade Stack's slate (248-258)
+   and executor's sage (154), and makes the eye's blue the one saturated hue.
+   Chroma stays under 0.016, so the page still reads as monochrome. Contrast is
+   AA: body, muted and dim text at least 4.8:1 on every surface, the large-text
+   second clause at least 3.1:1, the focus ring (--text) over 16:1.
    =========================================================================== */
 :root, [data-theme="dark"] {
-  --bg: #0b0b0b;
-  --bg-panel: #101010;
-  --bg-panel-2: #161616;
-  --text: #ededed;
-  --text-muted: #a3a3a3;
-  --text-dim: #959595;
+  --bg: #070c0c;
+  --bg-panel: #0c1112;
+  --bg-panel-2: #111818;
+  --text: #e9eeef;
+  --text-muted: #9ca5a6;
+  --text-dim: #8e9798;
   /* Second headline clause. Large text only. */
-  --second: #6f6f6f;
-  --accent: #ededed;
-  --hairline: #222222;
-  --hairline-strong: #333333;
-  --on-accent: #0b0b0b;
+  --second: #687172;
+  --accent: #e9eeef;
+  --hairline: #1c2424;
+  --hairline-strong: #2c3535;
+  --on-accent: #070c0c;
   /* Meaning, not branding: CI failing / running, write-gate tiers. */
   --pos: #6bbf7a;
   --warn: #d6b25e;
@@ -30,20 +37,20 @@
   --sticky-top: 0px;
 }
 [data-theme="light"] {
-  --bg: #fcfcfc;
-  --bg-panel: #fcfcfc;
-  --bg-panel-2: #f4f4f4;
-  --text: #111111;
-  --text-muted: #5f5f5f;
-  --text-dim: #6b6b6b;
-  --second: #8a8a8a;
-  --accent: #111111;
-  --hairline: #eaeaea;
-  --hairline-strong: #d4d4d4;
-  --on-accent: #fcfcfc;
-  --pos: #3f8a54;
-  --warn: #8a6a1c;
-  --danger: #b35540;
+  --bg: #fafdfd;
+  --bg-panel: #fafdfd;
+  --bg-panel-2: #f0f5f5;
+  --text: #0a1313;
+  --text-muted: #566262;
+  --text-dim: #626e6e;
+  --second: #828c8d;
+  --accent: #0a1313;
+  --hairline: #e5ecec;
+  --hairline-strong: #cdd6d7;
+  --on-accent: #fafdfd;
+  --pos: #307c47;
+  --warn: #89691b;
+  --danger: #b0523d;
 }
 :root { color-scheme: dark; }
 [data-theme="light"] { color-scheme: light; }

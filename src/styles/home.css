@@ -34,7 +34,7 @@ a.fit-node:hover { color: var(--text); }
 .fit-icon { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--hairline); border-radius: 8px; background: var(--bg); color: var(--text); }
 /* Company marks: symbols sit on a white tile in both themes so their own
    colors read; app icons fill the tile with their own background. */
-.fit-icon-symbol { background: #fcfcfc; border-color: var(--hairline-strong); }
+.fit-icon-symbol { background: #fafdfd; border-color: var(--hairline-strong); }
 .fit-icon-app { overflow: hidden; border: 0; background: transparent; }
 .fit-mark { display: block; }
 .fit-mark-symbol { width: 28px; height: 28px; object-fit: contain; }

@@ -5,6 +5,7 @@ import { PAGES } from '../lib/tool-pages.ts';
 import { parseRepo } from '../lib/releases.ts';
 import { fetchLatestRelease, fetchCIStatus, fetchGitHubRepoData, formatRelativeDate } from '../lib/github-data.ts';
 import { softwareApplicationLd, organizationLd, absoluteImage, graph } from '../lib/seo.ts';
+import { demoSvg } from '../lib/demos.ts';
 
 export function getStaticPaths() {
   return Object.keys(PAGES).map((slug) => ({ params: { slug } }));
@@ -14,6 +15,7 @@ const { slug } = Astro.params;
 const tool = TOOLS.find((t) => t.slug === slug)!;
 const page = PAGES[slug!]!;
 const { name, lifecycle, category, repo, npm } = tool;
+const demo = page.proof.type === 'demo' ? demoSvg(slug!) : null;
 
 const pageUrl = `https://lidless.dev/${slug}`;
 const title = name;
@@ -141,6 +143,15 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
           </figure>
         </section>
       )}
+      {page.proof.type === 'demo' && demo && (
+        <section class="sec">
+          <h2 class="label">See it work<small>terminal demo</small></h2>
+          <figure class="shot">
+            <div class="demo" role="img" aria-label={page.proof.alt} style={`--demo-end: ${demo.endX}`} set:html={demo.svg} />
+            <figcaption class="note">{page.proof.caption}</figcaption>
+          </figure>
+        </section>
+      )}
 
       <section class="sec">
         <h2 class="label">What it does</h2>
@@ -252,6 +263,15 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
   .shot { margin: 0; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
   .shot img { display: block; width: 100%; height: auto; }
   .shot figcaption { padding: 10px 14px; margin: 0; border-top: 1px solid var(--hairline); }
+  /* Demo text is drawn at a fixed share of the SVG width, so below ~600px it
+     would shrink past reading size. Keep it legible and scroll sideways instead. */
+  /* The body's letter-spacing inherits as a fixed length, which at the SVG's
+     1.67-unit glyph size squeezes every word, so reset it here. */
+  .demo { background: var(--bg-panel-2); overflow-x: auto; letter-spacing: 0; }
+  .demo :global(svg) { display: block; width: 100%; min-width: 600px; height: auto; }
+  @media (prefers-reduced-motion: reduce) {
+    .demo :global(g[style*="animation-name"]) { animation: none !important; transform: translateX(var(--demo-end)); }
+  }
 
   .body { color: var(--text-muted); font-size: 16px; line-height: 1.65; max-width: 42rem; margin: 0; }
 

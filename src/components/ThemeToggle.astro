@@ -1,0 +1,36 @@
+---
+// Every instance is bound by data attribute, so the rail and the mobile menu
+// can each carry one. The label names the theme a click switches to.
+---
+<button type="button" class="chip" data-theme-toggle aria-label="Toggle color theme">
+  <span data-theme-label>Light</span>
+</button>
+<script is:inline>
+  (() => {
+    if (window.__lidlessThemeToggle) return;
+    window.__lidlessThemeToggle = true;
+    const root = document.documentElement;
+    const sync = () => {
+      const next = root.dataset.theme === 'light' ? 'Dark' : 'Light';
+      document.querySelectorAll('[data-theme-label]').forEach((label) => { label.textContent = next; });
+    };
+    const bind = () => {
+      sync();
+      document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        if (btn.dataset.themeBound) return;
+        btn.dataset.themeBound = '1';
+        btn.addEventListener('click', () => {
+          const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+          root.dataset.theme = next;
+          // An explicit choice overrides the OS preference from here on.
+          try { localStorage.setItem('lidless-theme', next); } catch {}
+          sync();
+        });
+      });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+    else bind();
+    // The OS preference can flip the theme while no choice is stored.
+    new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  })();
+</script>

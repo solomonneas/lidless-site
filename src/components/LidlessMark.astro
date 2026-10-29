@@ -1,0 +1,11 @@
+---
+// The small Lidless eye used beside the wordmark. Same mark the nav has always
+// carried; its colors are the brand and stay fixed in both themes.
+interface Props { size?: number }
+const { size = 15 } = Astro.props;
+---
+<svg width={size} height={size} viewBox="0 0 120 120" aria-hidden="true">
+  <circle cx="60" cy="60" r="52" fill="#dde4e9" stroke="#243447" stroke-width="10"/>
+  <circle cx="60" cy="60" r="26" fill="#4db4ec"/>
+  <circle cx="60" cy="60" r="12" fill="#040e1b"/>
+</svg>

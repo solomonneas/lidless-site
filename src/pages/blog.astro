@@ -88,7 +88,7 @@ const catsOf = (ps: ReleasePost[]) => [...new Set(ps.map((p) => slugify(p.catego
     <div class="wrap">
       <div class="bar">
         <label class="sr-only" for="logFilter">Filter releases</label>
-        <input id="logFilter" class="mono" type="search" placeholder="Filter by tool or text..." autocomplete="off" />
+        <input id="logFilter" type="search" placeholder="Filter by tool or text" autocomplete="off" />
         {cats.length > 1 && (
           <div class="tabs" id="logTabs" role="group" aria-label="Filter by domain">
             <button type="button" data-cat="all" aria-pressed="true">All</button>
@@ -173,20 +173,20 @@ const catsOf = (ps: ReleasePost[]) => [...new Set(ps.map((p) => slugify(p.catego
   </script>
 
   <style>
-    .bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 0; border-bottom: 1px solid var(--hairline); position: sticky; top: 56px; background: rgba(0, 0, 0, .85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 5; }
-    .bar input { flex: 1; min-width: 200px; max-width: 360px; background: transparent; border: 0; outline: 0; color: var(--text); font-size: 14px; }
+    .bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 0; border-bottom: 1px solid var(--hairline); position: sticky; top: var(--sticky-top); background: var(--bg); z-index: 5; }
+    .bar input { flex: 1; min-width: 200px; max-width: 360px; background: transparent; border: 0; outline: 0; color: var(--text); font: inherit; font-size: 14px; }
     .bar input::placeholder { color: var(--text-dim); }
-    .month > .label { top: 136px; }
+    .month > .label { top: calc(var(--sticky-top) + 86px); }
     .row.log, .batch summary, .row.sub { display: grid; grid-template-columns: 64px 160px minmax(0, 1fr) auto; gap: 18px; align-items: baseline; }
     .dt { font-size: 12px; color: var(--text-dim); }
     .row .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .row .d.thin { color: var(--text-dim); }
-    .tag { font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline); border-radius: 6px; padding: 1px 7px; justify-self: end; }
+    .tag { font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline-strong); border-radius: 6px; padding: 1px 7px; justify-self: end; }
     .batch { border-bottom: 1px solid var(--hairline); }
     .batch:last-child { border-bottom: 0; }
     .batch summary { list-style: none; cursor: pointer; padding: 13px 0; border-bottom: 0; }
     .batch summary::-webkit-details-marker { display: none; }
-    .batch summary:hover .n { color: var(--accent); }
+    .batch summary:hover .d { color: var(--text); }
     .batch[open] summary .tag { color: var(--text); }
     .row.sub { padding: 10px 0; border-bottom: 0; border-top: 1px solid var(--hairline); }
     .empty { color: var(--text-dim); padding: 40px 0; }

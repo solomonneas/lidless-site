@@ -1,7 +1,7 @@
 export const SITE = {
   name: 'Lidless',
   formalName: 'Lidless Labs',
-  motto: 'The eye does not close.',
+  motto: 'Constant vigilance.',
   tagline: 'Open-source tooling that keeps watch over your stack.',
   seoTitle: 'Lidless - open-source security, netops, and homelab tooling',
   subtitle: 'The unsleeping eye over your SOC, network, and homelab',

@@ -1,9 +1,11 @@
 ---
 import '../styles/global.css';
+import '../styles/shell.css';
 import Analytics from '@vercel/analytics/astro';
 import CloudflareAnalytics from '../components/CloudflareAnalytics.astro';
 import SiteNav from '../components/SiteNav.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import SiteRail from '../components/SiteRail.astro';
 import Seo from '../components/Seo.astro';
 import { SITE } from '../lib/site.ts';
 import { organizationLd, websiteLd, graph } from '../lib/seo.ts';
@@ -79,11 +81,43 @@ const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
     />
     <Analytics />
     <CloudflareAnalytics />
+    <script is:inline>
+      // Follow the OS color scheme until the visitor picks a theme.
+      (() => {
+        const mq = window.matchMedia('(prefers-color-scheme: light)');
+        const stored = () => { try { return localStorage.getItem('lidless-theme'); } catch { return null; } };
+        const apply = () => { document.documentElement.dataset.theme = stored() ?? (mq.matches ? 'light' : 'dark'); };
+        apply();
+        mq.addEventListener('change', () => { if (!stored()) apply(); });
+      })();
+    </script>
   </head>
   <body>
+    <a class="skip-link" href="#content">Skip to content</a>
     <SiteNav />
-    <slot />
-    <SiteFooter />
+    <div class="site-shell">
+      <SiteRail />
+      <div class="site-column" id="content">
+        <slot />
+        <SiteFooter />
+      </div>
+    </div>
+    <script is:inline>
+      // Copy-a-command buttons ([data-copy]): copy the attribute, flash the label.
+      document.querySelectorAll('[data-copy]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const label = btn.querySelector('[data-copy-label]');
+          try {
+            await navigator.clipboard.writeText(btn.dataset.copy);
+            btn.dataset.copied = '';
+            if (label) label.textContent = 'Copied';
+          } catch {
+            if (label) label.textContent = 'Press Ctrl C';
+          }
+          setTimeout(() => { delete btn.dataset.copied; if (label) label.textContent = 'Copy'; }, 1500);
+        });
+      });
+    </script>
     <script is:inline>
       // Copy button on every code / terminal / config block (.term).
       (() => {
@@ -117,7 +151,7 @@ const ld = jsonLd ?? graph([organizationLd(), websiteLd(SITE.name, SITE.url)]);
               btn.classList.add('copied');
               setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
             } catch {
-              btn.textContent = 'Press ⌘C';
+              btn.textContent = 'Press Ctrl C';
               setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
             }
           });

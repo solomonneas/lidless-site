@@ -1,0 +1,48 @@
+---
+import { EXTERNAL, NAV_LINKS, SITE } from '../lib/site.ts';
+import { TOOLS, CATEGORY_ORDER } from '../lib/tools.ts';
+import { PAGES } from '../lib/tool-pages.ts';
+import LidlessMark from './LidlessMark.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const slug = path.replace(/^\/+/, '');
+const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS];
+// Tools has no page of its own (it is a homepage anchor), so it is never the
+// current link; a tool page marks itself in the tool list below instead.
+const current = links
+  .filter((l) => !l.href.includes('#'))
+  .filter((l) => (l.href === '/' ? path === '/' : path === l.href || path.startsWith(`${l.href}/`) || (l.href === '/blog' && path.startsWith('/changelog'))))
+  .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+// On a tool page the rail lists every tool page by category, like a docs index.
+const onTool = Boolean(PAGES[slug]);
+const groups = CATEGORY_ORDER.map((cat) => ({ cat, tools: TOOLS.filter((t) => t.category === cat && PAGES[t.slug]) })).filter((g) => g.tools.length);
+---
+<aside class="site-rail" aria-label="Site">
+  <a class="site-wordmark" href="/"><LidlessMark />{SITE.formalName}</a>
+  <nav class="rail-nav" aria-label="Primary">
+    {links.map((l) => <a href={l.href} aria-current={l.href === current ? 'page' : undefined}>{l.label}</a>)}
+  </nav>
+  {onTool && (
+    <>
+      <div class="rail-sep"></div>
+      <nav aria-label="Tools">
+        {groups.map((g) => (
+          <div class="rail-group">
+            <h2>{g.cat}</h2>
+            <ul>{g.tools.map((t) => <li><a href={`/${t.slug}`} aria-current={t.slug === slug ? 'page' : undefined}>{t.name}</a></li>)}</ul>
+          </div>
+        ))}
+      </nav>
+    </>
+  )}
+  <div class="rail-foot">
+    <div class="rail-sep"></div>
+    <div class="rail-meta">
+      <a href={EXTERNAL.github}>Open source, MIT</a>
+      <a href={EXTERNAL.github}>GitHub</a>
+      <a href="/blog/rss.xml">RSS</a>
+    </div>
+    <div class="rail-tools"><ThemeToggle /></div>
+  </div>
+</aside>

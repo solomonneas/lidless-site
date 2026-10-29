@@ -2,23 +2,15 @@
 import { SITE, EXTERNAL } from '../lib/site.ts';
 ---
 <footer class="site-footer">
-  <div class="wrap">
-    <span>&copy; {new Date().getFullYear()} {SITE.formalName}</span>
-    <nav aria-label="Footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-links">
       <a href="/#tools">Tools</a>
       <a href="/blog">Changelog</a>
       <a href="/docs">Docs</a>
       <a href="/blog/rss.xml">RSS</a>
       <a href={EXTERNAL.github}>GitHub</a>
-    </nav>
-    <span class="mono motto">{SITE.motto.toLowerCase().replace(/\.$/, '')}</span>
+      <span class="site-footer-end">&copy; {new Date().getFullYear()} {SITE.formalName} &middot; MIT license</span>
+    </div>
+    <p class="site-footer-lead">{SITE.tagline} {SITE.motto}</p>
   </div>
 </footer>
-
-<style>
-  .site-footer { border-top: 1px solid var(--hairline); padding: 28px 0; font-size: 13px; color: var(--text-dim); }
-  .site-footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
-  .site-footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
-  .site-footer nav a:hover { color: var(--text); }
-  .motto { margin-left: auto; }
-</style>

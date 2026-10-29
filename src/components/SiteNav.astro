@@ -1,43 +1,20 @@
 ---
-import { NAV_LINKS, EXTERNAL } from '../lib/site.ts';
-import { TOOLS } from '../lib/tools.ts';
-
-// On a tool page (/<slug>) the GitHub button points at that tool's repo;
-// everywhere else it points at the lidless-labs org.
-const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const slug = path.replace(/^\/+/, '');
-const tool = TOOLS.find((t) => t.slug === slug);
-const ghHref = tool ? tool.repo : EXTERNAL.github;
-const isOn = (href: string) =>
-  href === '/blog' ? path.startsWith('/blog') || path.startsWith('/changelog') : href !== '/#tools' && path === href;
+// Top bar for narrow screens. Above 820px the left rail (SiteRail) carries the
+// same links, so this bar is hidden there.
+import { EXTERNAL, NAV_LINKS, SITE } from '../lib/site.ts';
+import LidlessMark from './LidlessMark.astro';
+import ThemeToggle from './ThemeToggle.astro';
 ---
-<nav class="site-nav" aria-label="Main">
-  <div class="wrap">
-    <a href="/" class="brand">
-      <svg width="15" height="15" viewBox="0 0 120 120" aria-hidden="true">
-        <circle cx="60" cy="60" r="52" fill="#dde4e9" stroke="#243447" stroke-width="10"/>
-        <circle cx="60" cy="60" r="26" fill="#4db4ec"/>
-        <circle cx="60" cy="60" r="12" fill="#040e1b"/>
-      </svg>
-      Lidless Labs
-    </a>
-    <div class="links">
-      {NAV_LINKS.map((l) => <a href={l.href} aria-current={isOn(l.href) ? 'page' : undefined}>{l.label}</a>)}
-    </div>
-    <a class="btn sm gh" href={ghHref} aria-label={tool ? `${tool.name} on GitHub` : 'Lidless Labs on GitHub'}>GitHub</a>
-  </div>
-</nav>
-
-<style>
-  .site-nav { position: sticky; top: 0; z-index: 20; background: rgba(0, 0, 0, .72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); }
-  .site-nav .wrap { display: flex; align-items: center; height: 56px; gap: 28px; }
-  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
-  .links { display: flex; gap: 22px; font-size: 14px; color: var(--text-muted); }
-  .links a:hover, .links a[aria-current='page'] { color: var(--text); }
-  .gh { margin-left: auto; }
-  @media (max-width: 560px) {
-    .site-nav .wrap { gap: 16px; }
-    .links { gap: 14px; font-size: 13px; }
-    .gh { display: none; }
-  }
-</style>
+<header class="site-topbar">
+  <a class="site-wordmark" href="/"><LidlessMark />{SITE.formalName}</a>
+  <span class="topbar-spacer"></span>
+  <details class="topbar-menu">
+    <summary class="chip" aria-label="Open site menu">Menu</summary>
+    <nav class="topbar-panel" aria-label="Site">
+      <a href="/">Home</a>
+      {NAV_LINKS.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a href={EXTERNAL.github}>GitHub</a>
+      <div class="topbar-panel-tools"><ThemeToggle /></div>
+    </nav>
+  </details>
+</header>

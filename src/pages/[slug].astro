@@ -77,7 +77,7 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
 <BaseLayout title={title} description={description} jsonLd={jsonLd}>
   <main>
     <header class="tp-hero">
-      <div class="wrap">
+      <div class="wrap"><div class="tp-grid">
         <div class="tp-copy">
           <nav class="crumb" aria-label="Breadcrumb">
             <a href="/">Lidless Labs</a> / <a href={`/#${catAnchor[category] ?? 'tools'}`}>{category}</a> / <span>{name}</span>
@@ -96,12 +96,12 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
         </div>
 
         <aside class="facts" aria-label="At a glance">
-          <div class="k mono">at a glance</div>
+          <h2 class="k">At a glance</h2>
           {nums.length > 0 && <div class="nums">{nums.map((s) => <div><b>{s.n}</b>{s.l}</div>)}</div>}
           <dl>
-            <div><dt>version</dt><dd class="mono">{version ?? '—'}</dd></div>
-            <div><dt>ci</dt><dd class:list={['mono', ci && `ci-${ci.status}`]}>{ci ? ciLabel[ci.status] : '—'}</dd></div>
-            <div><dt>last push</dt><dd class="mono">{pushed ? formatRelativeDate(pushed) : '—'}</dd></div>
+            <div><dt>version</dt><dd class="mono">{version ?? '-'}</dd></div>
+            <div><dt>ci</dt><dd class:list={['mono', ci && `ci-${ci.status}`]}>{ci ? ciLabel[ci.status] : '-'}</dd></div>
+            <div><dt>last push</dt><dd class="mono">{pushed ? formatRelativeDate(pushed) : '-'}</dd></div>
             <div><dt>category</dt><dd class="mono">{category}</dd></div>
             <div><dt>package</dt><dd class="mono">{npm ? <a href={`https://www.npmjs.com/package/${npm}`}>npm &middot; {npm}</a> : 'run from source'}</dd></div>
             <div><dt>source</dt><dd class="mono"><a href={repo}>{parsed ? `${parsed.owner}/${parsed.repo}` : repo}</a></dd></div>
@@ -109,7 +109,7 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
             <div><dt>license</dt><dd class="mono">MIT</dd></div>
           </dl>
         </aside>
-      </div>
+      </div></div>
     </header>
 
     <div class="wrap">
@@ -169,13 +169,13 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
           <h2 class="label">Setup</h2>
           <div class="steps">
             {page.setup.install && (
-              <div class="step"><div class="k mono">01 &middot; install</div><div class="code"><pre class="term">{page.setup.install}</pre></div></div>
+              <div class="step"><h3 class="k">Install</h3><div class="code"><pre class="term">{page.setup.install}</pre></div></div>
             )}
             {page.setup.env && (
-              <div class="step"><div class="k mono">02 &middot; configure</div><p set:html={envHtml}></p></div>
+              <div class="step"><h3 class="k">Configure</h3><p set:html={envHtml}></p></div>
             )}
             {page.setup.config && (
-              <div class="step"><div class="k mono">03 &middot; {(page.setup.configLabel ?? 'client config').toLowerCase()}</div><div class="code"><pre class="term">{page.setup.config}</pre></div></div>
+              <div class="step"><h3 class="k">{page.setup.configLabel ?? 'Client config'}</h3><div class="code"><pre class="term">{page.setup.config}</pre></div></div>
             )}
           </div>
         </section>
@@ -184,7 +184,7 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
       {page.safety && (
         <section class="sec">
           <h2 class="label">Safety</h2>
-          <div class="safety"><div class="k mono">how it stays safe</div>{page.safety}</div>
+          <div class="safety">{page.safety}</div>
         </section>
       )}
 
@@ -210,17 +210,16 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
 </BaseLayout>
 
 <style>
-  .tp-hero { border-bottom: 1px solid var(--hairline); }
-  .tp-hero .wrap { display: grid; grid-template-columns: 1.6fr 1fr; border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline); }
-  .tp-copy { padding: 36px 44px 52px 40px; min-width: 0; }
-  .tp-copy .crumb { margin-bottom: 40px; }
+  .tp-hero .wrap > .tp-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 48px; padding: 56px 0 44px; border-bottom: 1px solid var(--hairline); }
+  .tp-copy { min-width: 0; }
+  .tp-copy .crumb { margin-bottom: 28px; }
   .titlerow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  h1 { font-size: 44px; line-height: 1.05; letter-spacing: -.04em; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
-  .status { font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline-strong); border-radius: 999px; padding: 3px 10px; }
-  .value { color: var(--text-muted); font-size: 16.5px; max-width: 560px; margin: 16px 0 26px; }
-  .value :global(b) { color: var(--text); font-weight: 500; }
+  h1 { font-size: 36px; line-height: 1.1; letter-spacing: -.03em; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+  .status { font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline-strong); border-radius: 6px; padding: 1px 8px; }
+  .value { color: var(--text-muted); font-size: 17px; line-height: 1.65; max-width: 36rem; margin: 16px 0 28px; }
+  .value :global(b) { color: var(--text); font-weight: 550; }
   .cta { display: flex; gap: 10px; flex-wrap: wrap; }
-  .install { margin-top: 22px; display: flex; align-items: center; gap: 12px; max-width: 460px; height: 42px; padding: 0 12px 0 14px; border: 1px solid var(--hairline-strong); border-radius: 8px; background: var(--bg-panel); font-size: 13px; color: var(--text-muted); position: relative; }
+  .install { margin-top: 22px; display: flex; align-items: center; gap: 12px; max-width: 460px; height: 42px; padding: 0 12px 0 14px; border: 1px dashed var(--hairline-strong); border-radius: 8px; font-size: 13px; color: var(--text); position: relative; }
   .install .p { color: var(--text-dim); }
   .install :global(.term-wrap) { position: static; flex: 1; min-width: 0; }
   .install .cmd { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 52px; }
@@ -228,8 +227,8 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; }
   .tags span { font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline); border-radius: 6px; padding: 2px 8px; }
 
-  .facts { border-left: 1px solid var(--hairline); padding: 36px 32px; min-width: 0; }
-  .facts .k { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; }
+  .facts { min-width: 0; padding-top: 4px; }
+  .facts .k { font-size: 12.5px; font-weight: 550; color: var(--text-dim); margin: 0 0 12px; }
   .nums { display: flex; flex-wrap: wrap; gap: 6px 20px; padding-bottom: 18px; margin-bottom: 6px; border-bottom: 1px solid var(--hairline); }
   .nums div { font-size: 13px; color: var(--text-dim); }
   .nums b { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -.02em; margin-right: 5px; }
@@ -242,44 +241,45 @@ const who: Record<string, string> = { ask: 'you', call: 'tool', ret: 'result', s
   dd.ci-failure { color: var(--danger); }
   dd.ci-pending { color: var(--warn); }
 
-  .session { border: 1px solid var(--hairline-strong); border-radius: 12px; overflow: hidden; }
+  .session { border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
   .turn { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--hairline); }
   .turn:last-child { border-bottom: 0; }
   .turn .who { font-size: 11px; color: var(--text-dim); padding-top: 3px; }
-  .turn.ask { background: var(--bg-panel); }
+  .turn.ask { background: var(--bg-panel-2); }
   .turn.ask .t, .turn.say .t { color: var(--text); }
-  .turn.call .t { font-size: 13px; color: var(--accent); overflow-wrap: anywhere; }
+  .turn.call .t { font-size: 13px; color: var(--text); overflow-wrap: anywhere; }
   .turn.ret .t { font-size: 12.5px; color: var(--text-muted); white-space: pre; overflow-x: auto; line-height: 1.75; }
-  .shot { margin: 0; border: 1px solid var(--hairline-strong); border-radius: 12px; overflow: hidden; }
+  .shot { margin: 0; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
   .shot img { display: block; width: 100%; height: auto; }
   .shot figcaption { padding: 10px 14px; margin: 0; border-top: 1px solid var(--hairline); }
 
-  .body { color: var(--text-muted); font-size: 15.5px; max-width: 680px; margin: 0; }
+  .body { color: var(--text-muted); font-size: 16px; line-height: 1.65; max-width: 42rem; margin: 0; }
 
-  .caps { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hairline); border-left: 1px solid var(--hairline); }
-  .cap { padding: 20px 22px; border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .caps { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+  .cap { padding: 18px 20px; border-top: 1px solid var(--hairline); }
+  .cap:nth-child(-n+2) { border-top: 0; }
+  .cap:nth-child(odd) { border-right: 1px solid var(--hairline); }
   .cap .top { display: flex; justify-content: space-between; gap: 12px; }
-  .cap h3 { margin: 0; font-size: 14px; font-weight: 500; }
+  .cap h3 { margin: 0; font-size: 14.5px; font-weight: 550; }
   .cap .c { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
   .cap p { margin: 6px 0 0; color: var(--text-muted); font-size: 14px; }
-  .ref { display: inline-block; margin-top: 14px; font-size: 13px; color: var(--text-muted); }
-  .ref:hover { color: var(--text); }
+  .ref { display: inline-block; margin-top: 14px; font-size: 13.5px; color: var(--text-muted); text-decoration: underline; text-decoration-color: var(--hairline-strong); text-underline-offset: 3px; }
+  .ref:hover { color: var(--text); text-decoration-color: currentColor; }
 
   .steps { display: grid; gap: 20px; min-width: 0; }
-  .step .k { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+  .step .k { margin: 0 0 8px; font-size: 13.5px; font-weight: 550; color: var(--text); }
   .step p { margin: 0; color: var(--text-muted); font-size: 14px; }
   .step .code pre { white-space: pre; }
 
-  .safety { border: 1px solid var(--hairline-strong); border-radius: 12px; padding: 20px 22px; color: var(--text-muted); font-size: 14.5px; }
-  .safety .k { color: var(--accent); font-size: 12px; margin-bottom: 8px; }
+  .safety { border: 1px dashed var(--hairline-strong); border-radius: 10px; padding: 16px 20px; color: var(--text-muted); font-size: 15px; line-height: 1.6; max-width: 42rem; }
 
   @media (max-width: 860px) {
-    .tp-hero .wrap { grid-template-columns: 1fr; border: 0; }
-    .tp-copy { padding: 32px 0; }
-    .tp-copy .crumb { margin-bottom: 24px; }
-    h1 { font-size: 34px; }
-    .facts { border-left: 0; border-top: 1px solid var(--hairline); padding: 24px 0 32px; }
+    .tp-hero .wrap > .tp-grid { grid-template-columns: 1fr; gap: 32px; padding: 32px 0; }
+    .tp-copy .crumb { margin-bottom: 20px; }
+    h1 { font-size: 30px; }
     .caps { grid-template-columns: 1fr; }
+    .cap:nth-child(2) { border-top: 1px solid var(--hairline); }
+    .cap:nth-child(odd) { border-right: 0; }
     .turn { grid-template-columns: 1fr; gap: 4px; }
   }
 </style>

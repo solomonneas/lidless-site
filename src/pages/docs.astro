@@ -45,7 +45,7 @@ const CLIENTS = [
 
     <div class="wrap layout">
       <nav class="toc" aria-label="On this page">
-        <div class="k mono">on this page</div>
+        <h2 class="k">On this page</h2>
         <a href="#shape">How the tools are built</a>
         <a href="#install">Install</a>
         <a href="#clients">Connect an AI client</a>
@@ -72,9 +72,9 @@ const CLIENTS = [
       <h2>Install</h2>
       <p class="sub">Published tools are on npm. Pick whichever of these fits how you work.</p>
       <div class="steps">
-        <div class="step"><div class="k mono">run on demand</div><div class="code"><pre>npx -y &lt;tool&gt;</pre></div><p class="note">Nothing to install globally. Your client runs this command each time it starts the server.</p></div>
-        <div class="step"><div class="k mono">install globally</div><div class="code"><pre>npm i -g &lt;tool&gt;</pre></div><p class="note">Faster startup, and the command is on your PATH for the CLI too.</p></div>
-        <div class="step"><div class="k mono">from source</div><div class="code"><pre>git clone https://github.com/lidless-labs/&lt;tool&gt;.git
+        <div class="step"><div class="k">Run on demand</div><div class="code"><pre>npx -y &lt;tool&gt;</pre></div><p class="note">Nothing to install globally. Your client runs this command each time it starts the server.</p></div>
+        <div class="step"><div class="k">Install globally</div><div class="code"><pre>npm i -g &lt;tool&gt;</pre></div><p class="note">Faster startup, and the command is on your PATH for the CLI too.</p></div>
+        <div class="step"><div class="k">From source</div><div class="code"><pre>git clone https://github.com/lidless-labs/&lt;tool&gt;.git
 cd &lt;tool&gt; &amp;&amp; npm install &amp;&amp; npm run build</pre></div><p class="note">For apps, and for anything not on npm yet. Check the README for the exact build steps.</p></div>
       </div>
       <p class="note">The Node tools need Node 20 or newer. Python tools name their version on the tool page.</p>
@@ -171,59 +171,64 @@ npx -y &lt;tool&gt;@latest        # on-demand; npx otherwise reuses its cache</p
   </script>
 
   <style>
-  .layout { display:grid; grid-template-columns:220px 1fr; gap:32px; }
+  /* Article column plus an "On this page" list on the right, as on Brigade Stack docs. */
+  .layout { display:grid; grid-template-columns:minmax(0, 46rem) 180px; gap:48px; }
   /* table of contents: plain text links, the active one just turns white */
-  .toc { position:sticky; top:84px; align-self:start; padding-top:40px; font-size:13.5px; }
-  .toc .k { font-size:12px; color:var(--text-dim); margin:0 0 10px; }
-  .toc a { display:block; padding:4px 0; color:var(--text-dim); transition:color .15s; }
+  .toc { order:2; position:sticky; top:calc(var(--sticky-top) + 48px); align-self:start; padding-top:40px; font-size:13.5px; }
+  .toc .k { font-size:12px; font-weight:600; color:var(--text-dim); margin:0 0 8px; }
+  .toc a { display:block; padding:2px 0; color:var(--text-muted); transition:color .15s; }
   .toc a:hover, .toc a.on { color:var(--text); }
-  .doc > section { padding:40px 0; border-bottom:1px solid var(--hairline); scroll-margin-top:64px; }
+  .doc > section { padding:40px 0; border-bottom:1px solid var(--hairline); scroll-margin-top:calc(var(--sticky-top) + 24px); }
   .doc > section:last-child { border-bottom:0; padding-bottom:96px; }
-  .doc h2 { margin:0 0 6px; font-size:22px; letter-spacing:-.02em; font-weight:600; }
-  .doc .sub { color:var(--text-muted); margin:0 0 22px; max-width:640px; }
-  .doc p { color:var(--text-muted); max-width:680px; }
+  .doc h2 { margin:0 0 6px; font-size:20px; letter-spacing:-.015em; font-weight:600; }
+  .doc .sub { color:var(--text-muted); margin:0 0 22px; max-width:42rem; }
+  .doc p { color:var(--text-muted); max-width:42rem; line-height:1.7; }
 
   .steps { display:grid; gap:20px; }
-  .step .k { font-size:12px; color:var(--text-dim); margin-bottom:8px; }
+  .step .k { font-size:13.5px; font-weight:550; color:var(--text); margin-bottom:8px; }
   .step p { margin:0 0 10px; }
 
-  .tiers { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  .tiers { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); border-radius:10px; overflow:hidden; }
   .tiers > div { padding:20px 22px; }
   .tiers > div + div { border-left:1px solid var(--hairline); }
-  .tiers .k { font-size:12px; margin-bottom:10px; }
-  .tiers h3 { margin:0 0 6px; font-size:15px; font-weight:500; }
+  .tiers .k { font-size:12.5px; margin-bottom:10px; }
+  .tiers h3 { margin:0 0 6px; font-size:15px; font-weight:550; }
   .tiers p { margin:0; font-size:14px; }
-  .t1 .k { color:#34d399; } .t2 .k { color:#fbbf24; } .t3 .k { color:#f87171; }
+  /* The tier word carries meaning, so it keeps a quiet semantic color. */
+  .t1 .k { color:var(--pos); } .t2 .k { color:var(--warn); } .t3 .k { color:var(--danger); }
   .note { font-size:13px; color:var(--text-dim); margin-top:12px; }
 
   table { width:100%; border-collapse:collapse; font-size:13px; }
   th { text-align:left; font-weight:500; font-size:12px; color:var(--text-dim); padding:0 12px 10px 0; border-bottom:1px solid var(--hairline-strong); }
   td { padding:11px 12px 11px 0; border-bottom:1px solid var(--hairline); vertical-align:top; color:var(--text-muted); }
   td:first-child a { color:var(--text); font-weight:500; transition:color .15s; }
-  td:first-child a:hover { color:var(--accent); }
+  td:first-child a:hover { text-decoration:underline; }
   td .env { display:flex; flex-wrap:wrap; gap:4px; }
   td .none { color:var(--text-dim); }
-  .kinds { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); border-radius:12px; overflow:hidden; }
+  .kinds { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hairline); border-radius:10px; overflow:hidden; }
   .kinds > div { padding:20px 22px; }
   .kinds > div + div { border-left:1px solid var(--hairline); }
-  .kinds .k { font-size:12px; color:var(--accent); margin-bottom:10px; }
-  .kinds h3 { margin:0 0 6px; font-size:15px; font-weight:500; }
+  .kinds .k { font-size:12.5px; color:var(--text-dim); margin-bottom:10px; }
+  .kinds h3 { margin:0 0 6px; font-size:15px; font-weight:550; }
   .kinds p { margin:0; font-size:14px; }
   .faq { border-top:1px solid var(--hairline); }
   .faq details { border-bottom:1px solid var(--hairline); }
   .faq summary { list-style:none; cursor:pointer; padding:14px 0; font-size:14.5px; display:flex; justify-content:space-between; gap:16px; }
   .faq summary::-webkit-details-marker { display:none; }
   .faq summary::after { content:'+'; color:var(--text-dim); font-family:var(--mono); }
-  .faq details[open] summary::after { content:'−'; }
+  .faq details[open] summary::after { content:'-'; }
   .faq details p { margin:0 0 16px; font-size:14px; }
-  .doc h3.h { font-size:15px; font-weight:500; margin:24px 0 8px; }
+  .doc h3.h { font-size:15.5px; font-weight:600; margin:24px 0 8px; }
 
-    .inl { color: var(--text); border-bottom: 1px solid var(--hairline-strong); }
+    .inl { color: var(--text); text-decoration: underline; text-decoration-color: var(--hairline-strong); text-underline-offset: 3px; }
+    .inl:hover { text-decoration-color: currentColor; }
     .client[hidden] { display: none; }
     .doc { min-width: 0; }
-    @media (max-width: 860px) {
-      .layout { grid-template-columns: 1fr; gap: 0; }
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
       .toc { display: none; }
+    }
+    @media (max-width: 860px) {
       .tiers, .kinds { grid-template-columns: 1fr; }
       .tiers > div + div, .kinds > div + div { border-left: 0; border-top: 1px solid var(--hairline); }
     }

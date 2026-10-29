@@ -155,7 +155,8 @@ code.i { font-family: var(--mono); font-size: .85em; color: var(--text); backgro
 @media (max-width: 860px) {
   .phead .frame { padding: 32px 0 28px; }
   .phead h1 { font-size: 28px; }
-  .sec { grid-template-columns: 1fr; gap: 16px; padding: 32px 0; }
+  /* minmax(0, ...) so a long code line scrolls inside its block instead of widening the page. */
+  .sec { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 32px 0; }
   .sec > .label { position: static; }
   .row { flex-wrap: wrap; gap: 4px 16px; }
   .row .n { min-width: 0; }

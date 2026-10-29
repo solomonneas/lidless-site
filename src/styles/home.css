@@ -5,10 +5,9 @@
 .home .hero-lead { max-width: 34rem; margin: 22px 0 0; color: var(--text-muted); font-size: 17px; line-height: 1.65; }
 .home .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 
-/* The eye sits on a plain bordered panel: no grid, no vignette. */
 .vis-panel { border: 1px solid var(--hairline); border-radius: 10px; background: var(--bg-panel); }
-/* The eye's panel takes the page color in both themes, so only the hairline frames it. */
-.eye-panel { position: relative; display: grid; place-items: center; aspect-ratio: 1; background: var(--bg); }
+/* The eye sits straight on the page: no panel, no border. */
+.eye-panel { position: relative; display: grid; place-items: center; aspect-ratio: 1; }
 .eye-panel .motto { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12px; color: var(--text-dim); }
 
 .home-section { max-width: 56rem; margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--hairline); scroll-margin-top: calc(var(--sticky-top) + 24px); }

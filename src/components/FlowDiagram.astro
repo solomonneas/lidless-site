@@ -1,0 +1,49 @@
+---
+import { FLOW, FLOW_MORE, FLOW_SOURCES, FLOW_TARGETS, type FlowNode } from '../lib/flow.ts';
+import { flowArc } from '../lib/flow-geometry.ts';
+
+// Source order is left column, hub, right column, so the stacked mobile
+// layout and screen readers follow the same left-to-right story.
+const cols = [
+  { side: 'left', label: FLOW.sourcesLabel, nodes: FLOW_SOURCES },
+  null,
+  { side: 'right', label: FLOW.targetsLabel, nodes: FLOW_TARGETS },
+] as const;
+const tile = (n: FlowNode) => ['fit-icon', n.mark && `fit-icon-${n.mark.style}`];
+---
+<div class="fit vis-panel" id="fit-flow" data-flow>
+  <svg class="fit-svg" aria-hidden="true"></svg>
+  {cols.map((col) => col ? (
+    <div class={`fit-col fit-col-${col.side}`}>
+      <h3 id={`fit-${col.side}`}>{col.label}</h3>
+      <ul class="fit-list" aria-labelledby={`fit-${col.side}`}>
+        {col.nodes.map((n, i) => {
+          const inner = (
+            <>
+              <span class:list={tile(n)}>
+                {n.mark ? (
+                  <img class:list={['fit-mark', `fit-mark-${n.mark.style}`]} src={n.mark.src} alt="" width="44" height="44" loading="lazy" decoding="async" />
+                ) : (
+                  /* lucide "plug" (ISC) */
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>
+                )}
+              </span>
+              <span class="fit-label">{n.label}</span>
+            </>
+          );
+          return (
+            <li style={`--arc: ${flowArc(i, col.nodes.length)}`}>
+              {n.href ? <a class="fit-node" href={n.href}>{inner}</a> : <span class="fit-node">{inner}</span>}
+            </li>
+          );
+        })}
+      </ul>
+      {col.side === 'right' && <a class="fit-more" href={FLOW_MORE.href}>{FLOW_MORE.label}</a>}
+    </div>
+  ) : (
+    <div class="fit-hub"><strong>{FLOW.hub}</strong><span>{FLOW.hubNote}</span></div>
+  ))}
+</div>
+<script>
+  import '../scripts/flow-diagram.ts';
+</script>

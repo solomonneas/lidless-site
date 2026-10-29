@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE, EXTERNAL } from '../lib/site.ts';
+import FlowDiagram from '../components/FlowDiagram.astro';
+import { FLOW } from '../lib/flow.ts';
+import '../styles/home.css';
+import { SITE } from '../lib/site.ts';
 import { TOOLS, CATEGORY_ORDER } from '../lib/tools.ts';
 import { graph, organizationLd, websiteLd } from '../lib/seo.ts';
 import { fetchLatestRelease, fetchCIStatus, fetchGitHubRepoData } from '../lib/github-data.ts';
@@ -10,6 +13,8 @@ import { parseRepo } from '../lib/releases.ts';
 const jsonLd = graph([organizationLd(), websiteLd('Lidless', 'https://lidless.dev')]);
 
 const total = TOOLS.length;
+// The hero's copy-a-command button.
+const INSTALL = 'npx -y wazuh-mcp';
 
 // Live per-tool health for the grid: last release date + CI status. Build-time,
 // static (no hydration). Cached per repo, fails soft, so a card just omits the
@@ -60,24 +65,21 @@ const CAT_BLURB: Record<string, string> = {
 };
 ---
 <BaseLayout title={SITE.seoTitle} description={SITE.metaDescription} jsonLd={jsonLd}>
-  <main>
-    <header class="hero">
-      <div class="wrap">
-        <div class="hero-copy">
-          <span class="pill"><b>{total} tools</b> &middot; all MIT, all local-first</span>
-          <h1>Watch your whole stack<br /><span>from one agent.</span></h1>
-          <p class="lede">
-            MCP servers and CLIs for the SOC, the network, and the homelab. Wazuh, MISP, TheHive,
-            LibreNMS, and Proxmox, read like a console by your AI client.
-          </p>
-          <div class="cta">
-            <a class="btn solid" href="#tools">Browse tools</a>
-            <a class="btn" href={EXTERNAL.github}>View on GitHub &rarr;</a>
-          </div>
-          <div class="install mono"><span class="p">$</span><span class="cmd term">npx -y wazuh-mcp</span></div>
+  <main class="home wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">Watch your whole stack<br /> <span class="hero-second">from one agent.</span></h1>
+        <p class="hero-lead">
+          MCP servers and CLIs that put Wazuh, MISP, TheHive, LibreNMS, and Proxmox in reach of your AI client.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn solid" href="#tools">Browse tools</a>
+          <button class="btn dashed" type="button" data-copy={INSTALL} aria-label={`Copy ${INSTALL}`}>
+            <code>{INSTALL}</code><span data-copy-label aria-hidden="true">Copy</span>
+          </button>
         </div>
-        <div class="hero-eye">
-          <span class="corner tl mono">lidless.dev</span>
+      </div>
+      <div class="eye-panel vis-panel">
       <svg class="lid-eye mt-6" viewBox="0 0 120 120" width="200" height="200"
         role="img" aria-label="The Lidless eye - it follows your cursor and never closes.">
         <defs>
@@ -144,62 +146,68 @@ const CAT_BLURB: Record<string, string> = {
           })();
         })();
       </script>
-          <span class="corner br mono">{SITE.motto.toLowerCase().replace(/\.$/, '')}</span>
+        <span class="motto mono">{SITE.motto.toLowerCase().replace(/\.$/, '')}</span>
+      </div>
+    </section>
+
+    <section class="home-section wide" aria-labelledby="flow-title">
+      <h2 id="flow-title">{FLOW.title}</h2>
+      <p class="section-lead">{FLOW.lead}</p>
+      <FlowDiagram />
+    </section>
+
+    <section id="tools" class="home-section wide tools" aria-labelledby="tools-title">
+      <div class="tools-head">
+        <div>
+          <h2 id="tools-title">Tools</h2>
+          <p class="section-lead">{total} tools, all MIT. Each one wires a real system into your AI client.</p>
+        </div>
+        <div class="tabs" id="toolTabs" role="group" aria-label="Filter by category">
+          <button type="button" data-cat="all" aria-pressed="true">All</button>
+          {CATEGORY_ORDER.map((c) => <button type="button" data-cat={CAT_ANCHOR[c]} aria-pressed="false">{CAT_SHORT[c]}</button>)}
         </div>
       </div>
-    </header>
-
-    <section id="tools" class="tools">
-      <div class="wrap">
-        <div class="sec-head">
-          <div>
-            <h2>Tools</h2>
-            <p>Each one wires a real system into your AI client. Writes are gated.</p>
-          </div>
-          <div class="tabs" id="toolTabs" role="group" aria-label="Filter by category">
-            <button type="button" data-cat="all" aria-pressed="true">All</button>
-            {CATEGORY_ORDER.map((c) => <button type="button" data-cat={CAT_ANCHOR[c]} aria-pressed="false">{CAT_SHORT[c]}</button>)}
-          </div>
-        </div>
-        <div class="filter">
-          <label class="sr-only" for="toolFilter">Filter tools</label>
-          <input id="toolFilter" class="mono" type="search" placeholder="Filter tools..." autocomplete="off" />
-        </div>
-
-        <div id="toolIndex">
-          {CATEGORY_ORDER.map((cat) => {
-            const inCat = TOOLS.filter((t) => t.category === cat);
-            return (
-              <section class="sec group" id={CAT_ANCHOR[cat]} data-cat={CAT_ANCHOR[cat]}>
-                <h3 class="label">{cat}<small><span class="count">{inCat.length}</span> tools &middot; {CAT_BLURB[cat]}</small></h3>
-                <div>
-                  {inCat.map((t) => {
-                    const h = health.get(t.slug);
-                    const ext = Boolean(t.href);
-                    return (
-                      <a class="row" href={t.href ?? `/${t.slug}`} target={ext ? '_blank' : undefined} rel={ext ? 'noopener noreferrer' : undefined}
-                        data-q={`${t.name} ${t.oneLiner}`.toLowerCase()}>
-                        <span class="n">{t.name}</span>
-                        <span class="d">{t.oneLiner}</span>
-                        {h?.version && <span class="v">{h.version}</span>}
-                        {t.lifecycle !== 'Active' && <span class="v">{t.lifecycle}</span>}
-                        <span class="go" aria-hidden="true">{ext ? '\u2197' : '\u2192'}</span>
-                      </a>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-          <p class="no-match mono" id="noMatch" hidden>No tools match.</p>
-        </div>
-
-        <div class="principles">
-          <div><div class="k mono">01 / read-first</div><h3>Read-only by default</h3><p>Anything that changes state needs an explicit confirm. Your agent looks before it touches.</p></div>
-          <div><div class="k mono">02 / local</div><h3>Runs on your machine</h3><p>The servers run beside your client over stdio. Credentials stay in your environment.</p></div>
-          <div><div class="k mono">03 / one shape</div><h3>Learn it once</h3><p>Every tool is configured and gated the same way. <a href="/docs">The docs</a> cover all of it.</p></div>
-        </div>
+      <div class="filter">
+        <label class="sr-only" for="toolFilter">Filter tools</label>
+        <input id="toolFilter" type="search" placeholder="Filter tools" autocomplete="off" />
       </div>
+
+      <div id="toolIndex">
+        {CATEGORY_ORDER.map((cat) => {
+          const inCat = TOOLS.filter((t) => t.category === cat);
+          return (
+            <section class="sec group" id={CAT_ANCHOR[cat]} data-cat={CAT_ANCHOR[cat]}>
+              <h3 class="label">{cat}<small><span class="count">{inCat.length}</span> tools &middot; {CAT_BLURB[cat]}</small></h3>
+              <div>
+                {inCat.map((t) => {
+                  const h = health.get(t.slug);
+                  const ext = Boolean(t.href);
+                  return (
+                    <a class="row" href={t.href ?? `/${t.slug}`} target={ext ? '_blank' : undefined} rel={ext ? 'noopener noreferrer' : undefined}
+                      data-q={`${t.name} ${t.oneLiner}`.toLowerCase()}>
+                      <span class="n">{t.name}</span>
+                      <span class="d">{t.oneLiner}</span>
+                      {h?.version && <span class="v">{h.version}</span>}
+                      {t.lifecycle !== 'Active' && <span class="v">{t.lifecycle}</span>}
+                      <span class="go" aria-hidden="true">{ext ? '\u2197' : '\u2192'}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+        <p class="no-match" id="noMatch" hidden>No tools match.</p>
+      </div>
+    </section>
+
+    <section class="home-section" aria-labelledby="behave-title">
+      <h2 id="behave-title">How every tool behaves</h2>
+      <dl class="behave">
+        <div><dt>Read-only by default</dt><dd>Anything that changes state needs an explicit confirm. Your agent looks before it touches.</dd></div>
+        <div><dt>Runs on your machine</dt><dd>The servers run beside your client over stdio. Credentials stay in your environment.</dd></div>
+        <div><dt>Learn it once</dt><dd>Every tool is configured and gated the same way. <a href="/docs">The docs</a> cover all of it.</dd></div>
+      </dl>
     </section>
   </main>
 
@@ -237,55 +245,4 @@ const CAT_BLURB: Record<string, string> = {
     })();
   </script>
 
-  <style>
-    .hero { border-bottom: 1px solid var(--hairline); }
-    .hero .wrap { display: grid; grid-template-columns: 1.2fr 1fr; border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline); }
-    .hero-copy { padding: 88px 48px 72px 40px; }
-    .pill { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-muted); border: 1px solid var(--hairline-strong); border-radius: 999px; padding: 4px 12px; }
-    .pill b { color: var(--text); font-weight: 500; }
-    h1 { font-size: 56px; line-height: 1.02; letter-spacing: -.045em; font-weight: 600; margin: 22px 0 18px; }
-    h1 span { color: var(--text-dim); }
-    .lede { color: var(--text-muted); font-size: 17px; max-width: 470px; margin: 0 0 30px; }
-    .cta { display: flex; gap: 10px; flex-wrap: wrap; }
-    .install { margin-top: 28px; display: flex; align-items: center; gap: 12px; max-width: 420px; height: 42px; padding: 0 12px 0 14px; border: 1px solid var(--hairline-strong); border-radius: 8px; background: var(--bg-panel); font-size: 13px; color: var(--text-muted); position: relative; }
-    .install .p { color: var(--text-dim); }
-    .install :global(.term-wrap) { position: static; flex: 1; }
-    .install :global(.copy-btn) { top: 50%; transform: translateY(-50%); }
-    .hero-eye { border-left: 1px solid var(--hairline); display: grid; place-items: center; position: relative; min-height: 360px;
-      background-image: linear-gradient(var(--hairline) 1px, transparent 1px), linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
-      background-size: 40px 40px; background-position: -1px -1px; }
-    .hero-eye::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 0 22%, #000 70%); pointer-events: none; }
-    .hero-eye :global(.lid-eye) { position: relative; z-index: 1; }
-    .corner { position: absolute; z-index: 1; font-size: 11px; color: var(--text-dim); }
-    .corner.tl { top: 14px; left: 16px; }
-    .corner.br { bottom: 14px; right: 16px; }
-
-    .tools { padding: 80px 0 40px; }
-    .sec-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-    .sec-head h2 { font-size: 32px; letter-spacing: -.035em; font-weight: 600; margin: 0; }
-    .sec-head p { color: var(--text-muted); margin: 6px 0 0; }
-    .filter { padding: 12px 0; border-bottom: 1px solid var(--hairline); position: sticky; top: 56px; background: rgba(0, 0, 0, .85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 5; }
-    .filter input { width: 100%; background: transparent; border: 0; outline: 0; color: var(--text); font-size: 14px; }
-    .filter input::placeholder { color: var(--text-dim); }
-    .group { scroll-margin-top: 110px; }
-    .group > .label { top: 130px; }
-    .no-match { color: var(--text-dim); padding: 40px 0; }
-
-    .principles { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; margin: 40px 0 60px; }
-    .principles > div { padding: 28px; }
-    .principles > div + div { border-left: 1px solid var(--hairline); }
-    .principles h3 { margin: 0 0 6px; font-size: 15px; font-weight: 500; }
-    .principles p { margin: 0; color: var(--text-muted); font-size: 14px; }
-    .principles p a { color: var(--text); border-bottom: 1px solid var(--hairline-strong); }
-    .principles .k { font-size: 12px; color: var(--accent); margin-bottom: 14px; }
-
-    @media (max-width: 860px) {
-      .hero .wrap { grid-template-columns: 1fr; border: 0; }
-      .hero-copy { padding: 48px 0 32px; }
-      h1 { font-size: 40px; }
-      .hero-eye { border-left: 0; border-top: 1px solid var(--hairline); min-height: 280px; order: -1; }
-      .principles { grid-template-columns: 1fr; }
-      .principles > div + div { border-left: 0; border-top: 1px solid var(--hairline); }
-    }
-  </style>
 </BaseLayout>

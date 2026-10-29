@@ -15,7 +15,7 @@ These are hard rules from the site owner. Do not ship any of the banned patterns
 - **No terminal/matrix aesthetic** and no default AI-template visuals (glows, gradient blobs, neon).
 
 **Keep**
-- The Lidless eye SVG and its cursor/scroll tracking script. It is the brand; do not redraw it.
+- The Lidless eye SVG and its cursor, touch, and scroll tracking script. It is the brand; do not redraw it.
 - The brand name in the rail and top bar is **Lidless Labs**, next to the small eye mark.
 - The visual system follows Brigade Stack (brigadestack.com): monochrome only, dark `#0b0b0b` on `#ededed` and light `#fcfcfc` on `#111111`, following the OS until the visitor picks a theme with the toggle. Ink is the accent, and the eye is the only color on the page. Semantic words (CI `failing`, write-gate tiers) may use the quiet `--pos` / `--warn` / `--danger` tokens. Geist + Geist Mono, 1px hairlines instead of shadows, a left rail with the links and theme toggle pinned bottom-left (a top bar under 820px), label column + content rows, plain text. Borrow the visual system only. Copy, voice, and branding stay Lidless.
 - Third-party products appear as their official marks on white tiles (`public/brands/`, sources recorded in `src/lib/flow.ts`). Diagrams are built in code, like the homepage flow diagram.

@@ -113,18 +113,26 @@ const CAT_BLURB: Record<string, string> = {
           // skip the cursor/scroll tracking loop and its listeners entirely.
           if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
           const b = e.querySelector('.eyeball');
-          let mx = null, my = null, cx = 0, cy = 0, ly = 0, gl = 0, tMouse = -1e9, tScroll = -1e9;
+          let mx = null, my = null, cx = 0, cy = 0, ly = 0, gl = 0, tMouse = -1e9, tScroll = -1e9, touching = false;
           const MAX = 14, MAXY = 12, NEAR = 620;
           // Track both inputs; whichever moved most recently drives the eye. This
           // way the cursor leads on desktop, but scrolling (wheel / trackpad /
           // touch) takes over the moment you scroll, on every device.
           addEventListener('mousemove', (v) => { mx = v.clientX; my = v.clientY; tMouse = v.timeStamp; }, { passive: true });
+          // Touch screens: the eye follows your finger while it is down, even
+          // mid-swipe; once the finger lifts, scrolling takes over again.
+          const touch = (v) => { const t = v.touches[0]; if (!t) return; mx = t.clientX; my = t.clientY; tMouse = v.timeStamp; touching = true; };
+          const lift = (v) => { touching = v.touches.length > 0; };
+          addEventListener('touchstart', touch, { passive: true });
+          addEventListener('touchmove', touch, { passive: true });
+          addEventListener('touchend', lift, { passive: true });
+          addEventListener('touchcancel', lift, { passive: true });
           addEventListener('scroll', (v) => { tScroll = v.timeStamp; }, { passive: true });
           (function f() {
             let tx = 0, ty = 0;
             const r = e.getBoundingClientRect();
             gl += ((scrollY - ly) - gl) * 0.2; ly = scrollY;   // smoothed scroll velocity, every frame
-            if (mx != null && tMouse >= tScroll && r.width) {
+            if (mx != null && (touching || tMouse >= tScroll) && r.width) {
               const ex = r.left + r.width / 2, ey = r.top + r.height / 2,
                 dx = mx - ex, dy = my - ey, d = Math.hypot(dx, dy) || 1;
               if (d < NEAR) {
@@ -132,13 +140,16 @@ const CAT_BLURB: Record<string, string> = {
                 ty = Math.max(-MAXY, Math.min(MAXY, dy / d * MAXY));
               }
             } else {
-              // scrolling (or touch / mobile with no cursor): the eye watches where
-              // you are on the page (vertical = scroll position) and glances a little
-              // further in the direction you're scrolling, easing back when you stop.
-              const sm = document.documentElement.scrollHeight - innerHeight;
-              const sf = sm > 0 ? Math.min(1, Math.max(0, scrollY / sm)) : 0;
-              const g = Math.max(-1, Math.min(1, gl / 26));      // -1..1 glance amount
-              ty = Math.max(-MAXY, Math.min(MAXY, (sf * 2 - 1) * MAXY + g * 4));
+              // scrolling (or touch / mobile with no finger down): the eye watches the
+              // middle of the screen, so it looks down as you scroll it up out of view
+              // and back up as it returns, and glances a little further in the
+              // direction you're scrolling, easing back when you stop. Measured
+              // against the viewport, not the whole page, so it moves visibly in the
+              // few hundred pixels the eye is actually on screen.
+              const ey = r.top + r.height / 2;
+              const v = (innerHeight / 2 - ey) / (innerHeight / 2);  // -1..1, + = screen middle is below the eye
+              const g = Math.max(-1, Math.min(1, gl / 26));         // -1..1 glance amount
+              ty = Math.max(-MAXY, Math.min(MAXY, v * MAXY + g * 4));
             }
             cx += (tx - cx) * 0.14; cy += (ty - cy) * 0.14;
             b.setAttribute('transform', 'translate(' + cx.toFixed(2) + ' ' + cy.toFixed(2) + ')');

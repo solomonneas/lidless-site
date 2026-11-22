@@ -3,7 +3,11 @@ import { SITE, EXTERNAL } from '../lib/site.ts';
 ---
 <footer class="site-footer">
   <div class="wrap">
-    <span>&copy; {new Date().getFullYear()} {SITE.formalName}</span>
+    <div class="credit">
+      <div>&copy; {new Date().getFullYear()} {SITE.formalName}</div>
+      <div>A project of <a href="https://escoffierlabs.dev">Escoffier Labs</a></div>
+      <div>Built by <a href="https://solomonneas.dev">Solomon Neas</a></div>
+    </div>
     <nav aria-label="Footer">
       <a href="/#tools">Tools</a>
       <a href="/blog">Changelog</a>
@@ -18,6 +22,7 @@ import { SITE, EXTERNAL } from '../lib/site.ts';
 <style>
   .site-footer { border-top: 1px solid var(--hairline); padding: 28px 0; font-size: 13px; color: var(--text-dim); }
   .site-footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  .credit a { text-decoration: underline; text-underline-offset: 0.18em; }
   .site-footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
   .site-footer nav a:hover { color: var(--text); }
   .motto { margin-left: auto; }

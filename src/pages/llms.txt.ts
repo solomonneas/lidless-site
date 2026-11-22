@@ -8,6 +8,10 @@ export function GET() {
     '',
     '> Lidless is an open-source lab of MCP servers and CLIs for security, network ops, and homelab systems. Everything is MIT licensed and local-first, and agent writes are gated behind explicit confirmation.',
     '',
+    'Lidless Labs is a project of [Escoffier Labs](https://escoffierlabs.dev).',
+    '',
+    'Built by [Solomon Neas](https://solomonneas.dev).',
+    '',
     '## Tools',
     '',
   ];
